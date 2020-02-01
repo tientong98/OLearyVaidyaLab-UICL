@@ -25,7 +25,7 @@ Remember to make a note of this in a task json file (task-stopsignal_bold.json) 
 
 
 
-```python
+```bash
 singularity pull docker://poldracklab/mriqc:latest
         
 singularity run -H /Users/tientong/.singularity \
@@ -44,7 +44,7 @@ participant --participant-label $(cat /Shared/oleary/functional/UICL/BIDS/subjec
 # Run FMRIPREP
 
 
-```python
+```bash
 # Run FMRIPREP
 
 # Pull the lastest version of fmriprep
@@ -73,7 +73,7 @@ participant --participant-label SUBJECT \
 ```
 
 
-```python
+```bash
 for sub in $(cat /Shared/oleary/functional/UICL/BIDS/subject_list/subjects.txt | tr '\n' ' ') ; do
     sed -e "s|SUBJECT|${sub}|" fmriprep_stopsignal_TEMPLATE.job > fmriprep_stopsignal_sub-${sub}.job
 done
@@ -159,7 +159,7 @@ done
 ```
 
 
-```python
+```bash
 cd /oleary/functional/UICL/BIDS/code/subject_glm/stopsignal/subject_glm_1run/6regressors
 bash
 source ~/sourcefiles/fsl_source.sh
