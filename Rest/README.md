@@ -55,7 +55,7 @@ Note: As of Sep 5 2019 fmriprep version 1.4.1 the ANTs command for fieldmap-less
 Therefore for UICL time 1 resting state data, this option was turned OFF.
 
 
-```python
+```bash
 # First create a template file for submitting jobs on argon
 
 
@@ -195,7 +195,7 @@ awk '{gsub("/oleary/functional/UICL/BIDS/derivatives/fmriprep/rest/fmriprep/", "
 ```
 
 
-```python
+```bash
 # example script to run xcpengine on argon
 # to understand the script, read this:
 # https://sudoneuroscience.wordpress.com/2017/06/08/running-multiple-jobs-on-the-argon-cluster-example-with-fmriprep/
