@@ -1,4 +1,6 @@
-Step-by-step analysis was detailed below.
+Analysis folder: Code of various group statistical tests, after rsFCs (using the Extended Power atlas) have been computed and extracted.
+
+Step-by-step analysis (raw -> subject level analysis) was detailed below.
 
 # BIDSification
 
