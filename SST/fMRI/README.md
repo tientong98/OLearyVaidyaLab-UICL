@@ -291,8 +291,11 @@ Number of inputs = number of runs
 
 __For FMIRPREP output WIHTOUT ICA AROMA__ 
 inputs: 
+
 /Shared/oleary/functional/UICL/BIDS/derivatives/subject_level_glm/noICA/sub-SUBJECT/ses-SESSION/stopsignal/sub-SUBJECT_ses-SESSION_task-stopsignal_run-1.feat/stats/cope8.nii.gz
+
 /Shared/oleary/functional/UICL/BIDS/derivatives/subject_level_glm/noICA/sub-SUBJECT/ses-SESSION/stopsignal/sub-SUBJECT_ses-SESSION_task-stopsignal_run-2.feat/stats/cope8.nii.gz
+
 output:
 /Shared/oleary/functional/UICL/BIDS/derivatives/subject_level_glm/acrossruns/noICA/CorStop-CorGo_across-runs/SUBJECT
 
