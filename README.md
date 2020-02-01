@@ -1,11 +1,12 @@
 # O'Leary-Vaidya Lab - University of Iowa College Life study (UICL)
 
 This repo contains code to analyze fMRI data of the UICL study:
+* [Resting state](https://github.com/tientong98/OLearyVaidyaLab-UICL/tree/master/SST)
+
 * [Monetary Incentive Delay task - MID](https://github.com/tientong98/OLearyVaidyaLab-UICL/tree/master/MID)
 
 * [Stop Signal Task - SST](https://github.com/tientong98/OLearyVaidyaLab-UICL/tree/master/Rest)
 
-* [Resting state](https://github.com/tientong98/OLearyVaidyaLab-UICL/tree/master/SST)
 
 Overall,the pipeline of all 3 fMRI datasets involve:
 1. [Conversion to BIDS format](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Heudiconv.ipynb)
