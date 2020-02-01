@@ -1,3 +1,7 @@
+**`SST.R`** Group level analysis
+
+Step-by-step details of subject level analysis are below.
+
 
 Get event timing in BIDS format using `txt_2_BIDSevents-sst.py`
 
