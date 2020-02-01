@@ -1,3 +1,6 @@
+**`MID.R`** Group level analysis
+
+Step-by-step details of subject level analysis are below.
 
 # BIDSification
 
