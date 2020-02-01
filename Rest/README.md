@@ -1,4 +1,4 @@
-Analysis folder: Code of various group statistical tests, after rsFCs (using the Extended Power atlas) have been computed and extracted.
+**Analysis folder**: Code of various group statistical tests, after rsFCs (using the Extended Power atlas) have been computed and extracted.
 
 Step-by-step analysis (raw -> subject level analysis) was detailed below.
 
