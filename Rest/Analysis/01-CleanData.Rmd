@@ -1,0 +1,736 @@
+---
+title: "UICL Rest"
+output: html_notebook
+---
+
+```{r}
+rm(list=ls())
+setwd("~/Documents/oleary/rest/")
+library(dplyr)
+library(car)
+library(lsr)
+```
+
+
+```{r}
+subject <- c(3003, 3004, 3005, 3006, 3009, 3011, 3013, 3016, 3017, 3018, 3021, 3022, 3023, 3024, 3025, 3026, 3027, 3029, 3030, 3031, 3032, 3034, 3036, 3037, 3039, 3040, 3041, 3042, 3043, 3044, 3045, 3046, 3050, 3051, 3052, 3055, 3056, 3057, 3058, 3059, 3060, 3061, 3062, 3063, 3066, 3067, 3068, 3069, 3070, 3071, 3072, 3073, 3074, 3075, 3076, 3077, 3078, 3079, 3080, 3081, 3082, 3083, 3084, 3085, 3086, 3087, 3089, 3091, 3093, 3094, 3095, 3096, 3097, 3098, 3099, 3100, 3101, 3102, 3103, 3104, 3106, 3107, 3108, 3110, 3111, 3112, 3113, 3114, 3116, 3117, 3118, 3120, 3123, 3125, 3126, 3127, 3128, 3129, 3130, 3132, 3133, 3134, 3136, 3137, 3138, 3139, 3140, 3141, 3142, 3144, 3145, 3148, 3149, 3150, 3151, 3152, 3153, 3155, 3157, 3158, 3160, 3161, 3163, 3164, 3165, 3166, 3167, 3168, 3169, 3171, 3172, 3173, 3175, 3176, 3177, 3181, 3182, 3183, 3184, 3185, 3186, 3187, 3188, 3189, 3192, 3193, 3195, 3197, 3198, 3199, 3200, 3201, 3202, 3203, 3204, 3205, 3206, 3207, 3208, 3209, 4101, 5000, 5001, 5002, 5003, 5004, 5006, 5007, 5008, 5009, 5010, 5011, 5012, 5014, 5015, 5016, 5017, 5018, 5020, 5022, 5024, 5025, 5026, 5027, 5028, 5029, 5030, 5031, 5032, 5034, 5035, 5036, 5037, 5038, 5039, 5040, 5041, 5043, 5044, 5047, 5048, 5050, 5051, 5052, 5054, 5055, 5059, 5061, 5062, 5064, 5065, 5066, 5067, 5068, 5069, 5070, 5072, 5073, 5074, 5075, 5076)
+
+session <- c(60844114, 60642114, 60730114, 61218714, 60946214, 60913814, 61230414, 61319014, 61449114, 61434514, 61032114, 61145414, 61432614, 61722814, 61549914, 61521914, 61535914, 61620714, 61750814, 61721914, 61708114, 61822714, 61763914, 63926214, 62369814, 64069714, 64182514, 64184914, 64125314, 64272114, 64066514, 64243014, 64559714, 64444714, 64442614, 64342014, 64558514, 64459014, 64744514, 64977014, 64645914, 64572314, 64747014, 65047514, 64975114, 64990514, 64932914, 65147714, 65060914, 65076014, 60223115, 65062714, 60641315, 65248914, 60093215, 60527515, 60498815, 60628415, 60483615, 60512015, 60597115, 60595615, 60526115, 60700715, 60540315, 60585615, 60926915, 61045415, 60801315, 60712915, 60743615, 60900715, 60930815, 61027015, 61031615, 61348315, 60988915, 61032515, 61231215, 61290115, 61017415, 61333815, 61230315, 61491515, 61001215, 61346915, 61636915, 61388015, 61435015, 61535415, 61635515, 61620715, 61705915, 61693915, 61895515, 61835415, 61822415, 61907115, 62137915, 63764115, 63551315, 63937815, 63954715, 63853815, 63739515, 63710315, 63940415, 64040415, 63825815, 63969115, 64012615, 64128115, 64153315, 64154215, 64415115, 63868015, 64069515, 64024015, 64356315, 64416115, 64573115, 64743515, 64457015, 64917015, 64632215, 64470115, 64875115, 65050315, 64859015, 64948715, 64731715, 64861115, 65061515, 60511116, 60585716, 60667716, 60527716, 60683216, 60727216, 60815816, 60700916, 60900316, 60898816, 61029516, 61101116, 61304416, 61636716, 61680116, 61507016, 61491816, 61835516, 61632616, 61693416, 61722516, 61708616, 61823616, 61837616, 61924316, 61936216, 61807916, 64874513, 63969514, 64024314, 64157414, 64427014, 64343414, 64670814, 64557614, 64657514, 64544814, 64672514, 64746014, 64628814, 64661014, 64686414, 64974114, 65074914, 60439215, 60643215, 60842315, 61331615, 61144615, 61101215, 60885915, 61102415, 61044415, 60927915, 61216515, 61303315, 61447415, 61518315, 61736215, 61723415, 61807915, 63537915, 61851815, 63750515, 61794415, 63939515, 64053115, 64227215, 64357315, 64443515, 64340315, 64224815, 65059715, 64617215, 64831215, 64659615, 64934915, 64958315, 60094116, 60423316, 60830516, 61190016, 61014516, 61088816, 61204616, 61405416, 61319516, 61780216)
+
+```
+
+# See what are the ROIs that all subjects have data for
+
+```{r}
+# read each subject file, get the ROI index for each subject
+# output a text file row = subject, columns = common ROIs
+for (i in 1:length(subject)) {
+  df <- read.table(file = paste0("./all_ses1/sub-",subject[i],"_ses-",session[i],"_extendedPower_000.netcc"), header = F)
+  roi <- df[1,]
+  write.table(roi, "roi.txt", quote = F, col.names = F, row.names = F, sep = "\t", append = T)
+}
+```
+
+
+```{r}
+# pasting something needed for the next code
+for (x in 1:221) {
+  print(paste0("roi[", x, ", ],"))
+}
+```
+
+
+```{r}
+# dplyr masks intersect function
+# see what is the intersection between all subjects (common ROIs)
+
+roi <- read.table("roi.txt", header = F, col.names = paste0("V",seq_len(299)), fill = TRUE)
+
+common <- Reduce(base::intersect, list(
+roi[1, ], 
+roi[2, ],
+roi[3, ],
+roi[4, ],
+roi[5, ],
+roi[6, ],
+roi[7, ],
+roi[8, ],
+roi[9, ],
+roi[10, ],
+roi[11, ],
+roi[12, ],
+roi[13, ],
+roi[14, ],
+roi[15, ],
+roi[16, ],
+roi[17, ],
+roi[18, ],
+roi[19, ],
+roi[20, ],
+roi[21, ],
+roi[22, ],
+roi[23, ],
+roi[24, ],
+roi[25, ],
+roi[26, ],
+roi[27, ],
+roi[28, ],
+roi[29, ],
+roi[30, ],
+roi[31, ],
+roi[32, ],
+roi[33, ],
+roi[34, ],
+roi[35, ],
+roi[36, ],
+roi[37, ],
+roi[38, ],
+roi[39, ],
+roi[40, ],
+roi[41, ],
+roi[42, ],
+roi[43, ],
+roi[44, ],
+roi[45, ],
+roi[46, ],
+roi[47, ],
+roi[48, ],
+roi[49, ],
+roi[50, ],
+roi[51, ],
+roi[52, ],
+roi[53, ],
+roi[54, ],
+roi[55, ],
+roi[56, ],
+roi[57, ],
+roi[58, ],
+roi[59, ],
+roi[60, ],
+roi[61, ],
+roi[62, ],
+roi[63, ],
+roi[64, ],
+roi[65, ],
+roi[66, ],
+roi[67, ],
+roi[68, ],
+roi[69, ],
+roi[70, ],
+roi[71, ],
+roi[72, ],
+roi[73, ],
+roi[74, ],
+roi[75, ],
+roi[76, ],
+roi[77, ],
+roi[78, ],
+roi[79, ],
+roi[80, ],
+roi[81, ],
+roi[82, ],
+roi[83, ],
+roi[84, ],
+roi[85, ],
+roi[86, ],
+roi[87, ],
+roi[88, ],
+roi[89, ],
+roi[90, ],
+roi[91, ],
+roi[92, ],
+roi[93, ],
+roi[94, ],
+roi[95, ],
+roi[96, ],
+roi[97, ],
+roi[98, ],
+roi[99, ],
+roi[100, ],
+roi[101, ],
+roi[102, ],
+roi[103, ],
+roi[104, ],
+roi[105, ],
+roi[106, ],
+roi[107, ],
+roi[108, ],
+roi[109, ],
+roi[110, ],
+roi[111, ],
+roi[112, ],
+roi[113, ],
+roi[114, ],
+roi[115, ],
+roi[116, ],
+roi[117, ],
+roi[118, ],
+roi[119, ],
+roi[120, ],
+roi[121, ],
+roi[122, ],
+roi[123, ],
+roi[124, ],
+roi[125, ],
+roi[126, ],
+roi[127, ],
+roi[128, ],
+roi[129, ],
+roi[130, ],
+roi[131, ],
+roi[132, ],
+roi[133, ],
+roi[134, ],
+roi[135, ],
+roi[136, ],
+roi[137, ],
+roi[138, ],
+roi[139, ],
+roi[140, ],
+roi[141, ],
+roi[142, ],
+roi[143, ],
+roi[144, ],
+roi[145, ],
+roi[146, ],
+roi[147, ],
+roi[148, ],
+roi[149, ],
+roi[150, ],
+roi[151, ],
+roi[152, ],
+roi[153, ],
+roi[154, ],
+roi[155, ],
+roi[156, ],
+roi[157, ],
+roi[158, ],
+roi[159, ],
+roi[160, ],
+roi[161, ],
+roi[162, ],
+roi[163, ],
+roi[164, ],
+roi[165, ],
+roi[166, ],
+roi[167, ],
+roi[168, ],
+roi[169, ],
+roi[170, ],
+roi[171, ],
+roi[172, ],
+roi[173, ],
+roi[174, ],
+roi[175, ],
+roi[176, ],
+roi[177, ],
+roi[178, ],
+roi[179, ],
+roi[180, ],
+roi[181, ],
+roi[182, ],
+roi[183, ],
+roi[184, ],
+roi[185, ],
+roi[186, ],
+roi[187, ],
+roi[188, ],
+roi[189, ],
+roi[190, ],
+roi[191, ],
+roi[192, ],
+roi[193, ],
+roi[194, ],
+roi[195, ],
+roi[196, ],
+roi[197, ],
+roi[198, ],
+roi[199, ],
+roi[200, ],
+roi[201, ],
+roi[202, ],
+roi[203, ],
+roi[204, ],
+roi[205, ],
+roi[206, ],
+roi[207, ],
+roi[208, ],
+roi[209, ],
+roi[210, ],
+roi[211, ],
+roi[212, ],
+roi[213, ],
+roi[214, ],
+roi[215, ],
+roi[216, ],
+roi[217, ],
+roi[218, ],
+roi[219, ],
+roi[220, ],
+roi[221, ]))
+
+
+# save 267 common rois
+row.names(common) <- NULL
+common <- as.character(common[1,])
+write.table(common, "commonroi.txt", quote = F, col.names = F, row.names = F, sep = "\t")
+```
+
+NAcc: R - 175, L - 176 (reward network)  
+Hippo: L posterior - 98, R posterior - 99 (98, 99 default mode), L anterior - 162; R anterior -163 (162, 163 medial temporal)  
+Amygdala: L - 173, R - 174 (reward network)  
+Only 174 was excluded  
+
+```{r}
+# create a character vector: 1,2,3,4,5,..300
+threehundred <- as.character(seq(1, 300, by=1))
+# find out which ROIs are excluded (33 total)
+excludedroi <- as.numeric(setdiff(threehundred, common))
+excludedroi
+
+for (i in 1:length(excludedroi)) {
+  print(paste0("ROI index ",excludedroi[i],":"))
+  print(sum(roi[,] == excludedroi[i], na.rm = T))
+}
+```
+
+"ROI index 243:" 8 OFC
+
+"ROI index 246:" 30 inferior temporal
+
+```{r}
+# read in 3dnetcorr output, then grab the cell in the first column whose value == 4 (starting of z correl)
+# then name columns as rows by ROI number, then subset to only common ROIs, then save to new text file
+
+for (i in 1:length(subject)) {
+  cormat <- read.table(file = paste0("./all_ses1/sub-",subject[i],"_ses-",session[i],"_extendedPower_000.netcc"), header = F)
+  roiname <- cormat[1,]
+  cormat <- cormat[(which(cormat$V1 == 4):length(cormat$V1)),]
+  rownames(cormat) <- roiname
+  colnames(cormat) <- roiname
+  newcormat <- cormat[common, common]
+  newcormat <- as.matrix(newcormat)
+  diag(newcormat) <- NA
+  write.table(newcormat, file = paste0("./common/sub-",subject[i],".txt"), 
+              quote = F, col.names = F, row.names = F, sep = "\t")
+}
+```
+
+
+```{r}
+# read file network, then subset so that only common ROIs were included, then just select the index network affilication columns
+
+network <- read.table("network.txt", header = T)
+networkcommon <- subset(network, network$newindex %in% common)
+rownames(networkcommon) <- NULL
+# final index of the commmon ROI, sort by network
+networkcommon$finalindex <- rownames(networkcommon)
+# fix 1 typo -- only 14 networks
+networkcommon[networkcommon$netName == "VentralAttetion",]$netName <- "VentralAttention"
+
+unique(networkcommon$netName)
+```
+
+# 300 ROIs
+
+```{r}
+# 14 network (13 actual networks, 1 unidentified <- not included in analysis)
+
+print("Auditory")
+sum(network$netName == "Auditory")
+print("CinguloOpercular")
+sum(network$netName == "CinguloOpercular")
+print("DefaultMode")
+sum(network$netName == "DefaultMode")
+print("DorsalAttention")
+sum(network$netName == "DorsalAttention")
+print("FrontoParietal")
+sum(network$netName == "FrontoParietal")
+print("MedialTemporalLobe")
+sum(network$netName == "MedialTemporalLobe")
+print("ParietoMedial")
+sum(network$netName == "ParietoMedial")
+print("Reward")
+sum(network$netName == "Reward")
+print("Salience")
+sum(network$netName == "Salience")
+print("SomatomotorDorsal")
+sum(network$netName == "SomatomotorDorsal")
+print("SomatomotorLateral")
+sum(network$netName == "SomatomotorLateral")
+print("unassigned")
+sum(network$netName == "unassigned")
+print("VentralAttention")
+sum(network$netName == "VentralAttention")
+print("Visual")
+sum(network$netName == "Visual")
+```
+
+# 267 ROIs
+
+```{r}
+# 14 network (13 actual networks, 1 unidentified <- not included in analysis)
+
+print("Auditory")
+sum(networkcommon$netName == "Auditory")
+print("CinguloOpercular")
+sum(networkcommon$netName == "CinguloOpercular")
+print("DefaultMode")
+sum(networkcommon$netName == "DefaultMode")
+print("DorsalAttention")
+sum(networkcommon$netName == "DorsalAttention")
+print("FrontoParietal")
+sum(networkcommon$netName == "FrontoParietal")
+print("MedialTemporalLobe")
+sum(networkcommon$netName == "MedialTemporalLobe")
+print("ParietoMedial")
+sum(networkcommon$netName == "ParietoMedial")
+print("Reward")
+sum(networkcommon$netName == "Reward")
+print("Salience")
+sum(networkcommon$netName == "Salience")
+print("SomatomotorDorsal")
+sum(networkcommon$netName == "SomatomotorDorsal")
+print("SomatomotorLateral")
+sum(networkcommon$netName == "SomatomotorLateral")
+print("unassigned")
+sum(networkcommon$netName == "unassigned")
+print("VentralAttention")
+sum(networkcommon$netName == "VentralAttention")
+print("Visual")
+sum(networkcommon$netName == "Visual")
+```
+
+
+
+```{r}
+# 91 dependent variables
+
+for (i in 1:length(subject)) {
+  commonmat <- as.matrix(read.table(file = paste0("./common/sub-",subject[i],".txt")), 
+                         nrow = 267, ncol=267, diag = F)
+  Auditory <- mean(commonmat[1:12, 1:12], na.rm = T)
+  CinguloOpercular <- mean(commonmat[13:39, 13:39], na.rm = T)
+  DefaultMode <- mean(commonmat[40:96, 40:96], na.rm = T)
+  DorsalAttention <- mean(commonmat[97:111, 97:111], na.rm = T)
+  FrontoParietal <- mean(commonmat[112:141, 112:141], na.rm = T)
+  MedialTemporal <- mean(commonmat[142:143, 142:143], na.rm = T)
+  ParietoMedial <- mean(commonmat[144:148, 144:148], na.rm = T)
+  Reward <- mean(commonmat[149:153, 149:153], na.rm = T)
+  Salience <- mean(commonmat[154:164, 154:164], na.rm = T)
+  SomatomotorDorsal <- mean(commonmat[165:204, 165:204], na.rm = T)
+  SomatomotorLateral <- mean(commonmat[205:215, 205:215], na.rm = T)
+  VentralAttention <- mean(commonmat[220:230, 220:230], na.rm = T)
+  Visual <- mean(commonmat[231:267, 231:267], na.rm = T)
+  
+  Auditory.CinguloOpercular <- mean(commonmat[13:39, 1:12], na.rm = T)
+  Auditory.DefaultMode <- mean(commonmat[40:96, 1: 12], na.rm = T)
+  Auditory.DorsalAttention <- mean(commonmat[97:111, 1:12], na.rm = T)
+  Auditory.FrontoParietal <- mean(commonmat[112:141, 1:12], na.rm = T)
+  Auditory.MedialTemporal <- mean(commonmat[142:143, 1:12], na.rm = T)
+  Auditory.ParietoMedial <- mean(commonmat[144:148, 1:12], na.rm = T)
+  Auditory.Reward <- mean(commonmat[149:153, 1:12], na.rm = T)
+  Auditory.Salience <- mean(commonmat[154:164, 1:12], na.rm = T)
+  Auditory.SomatomotorDorsal <- mean(commonmat[165:204, 1:12], na.rm = T)
+  Auditory.SomatomotorLateral <- mean(commonmat[205:215, 1:12], na.rm = T)
+  Auditory.VentralAttention <- mean(commonmat[220:230, 1:12], na.rm = T)
+  Auditory.Visual <- mean(commonmat[231:267, 1:12], na.rm = T)
+  
+  CinguloOpercular.DefaultMode <- mean(commonmat[40:96, 13:39], na.rm = T)
+  CinguloOpercular.DorsalAttention <- mean(commonmat[97:111, 13:39], na.rm = T)
+  CinguloOpercular.FrontoParietal <- mean(commonmat[112:141, 13:39], na.rm = T)
+  CinguloOpercular.MedialTemporal <- mean(commonmat[142:143, 13:39], na.rm = T)
+  CinguloOpercular.ParietoMedial <- mean(commonmat[144:148, 13:39], na.rm = T)
+  CinguloOpercular.Reward <- mean(commonmat[149:153, 13:39], na.rm = T) 
+  CinguloOpercular.Salience <- mean(commonmat[154:164, 13:39], na.rm = T)
+  CinguloOpercular.SomatomotorDorsal <- mean(commonmat[165:204, 13:39], na.rm = T)
+  CinguloOpercular.SomatomotorLateral <- mean(commonmat[205:215, 13:39], na.rm = T)
+  CinguloOpercular.VentralAttention <- mean(commonmat[220:230, 13:39], na.rm = T)
+  CinguloOpercular.Visual <- mean(commonmat[231:267, 13:39], na.rm = T)
+  
+  DefaultMode.DorsalAttention <- mean(commonmat[97:111, 40:96], na.rm = T)
+  DefaultMode.FrontoParietal <- mean(commonmat[112:141, 40:96], na.rm = T)
+  DefaultMode.MedialTemporal <- mean(commonmat[142:143, 40:96], na.rm = T)
+  DefaultMode.ParietoMedial <- mean(commonmat[144:148, 40:96], na.rm = T)
+  DefaultMode.Reward <- mean(commonmat[149:153, 40:96], na.rm = T)
+  DefaultMode.Salience <- mean(commonmat[154:164, 40:96], na.rm = T)
+  DefaultMode.SomatomotorDorsal <- mean(commonmat[165:204, 40:96], na.rm = T)
+  DefaultMode.SomatomotorLateral <- mean(commonmat[205:215, 40:96], na.rm = T)
+  DefaultMode.VentralAttention <- mean(commonmat[220:230, 40:96], na.rm = T)
+  DefaultMode.Visual <- mean(commonmat[231:267, 40:96], na.rm = T)
+  
+  DorsalAttention.FrontoParietal <- mean(commonmat[112:141, 97:111], na.rm = T)
+  DorsalAttention.MedialTemporal <- mean(commonmat[142:143, 97:111], na.rm = T)
+  DorsalAttention.ParietoMedial <- mean(commonmat[144:148, 97:111], na.rm = T)
+  DorsalAttention.Reward <- mean(commonmat[149:153, 97:111], na.rm = T)
+  DorsalAttention.Salience <- mean(commonmat[154:164, 97:111], na.rm = T)
+  DorsalAttention.SomatomotorDorsal <- mean(commonmat[165:204, 97:111], na.rm = T)
+  DorsalAttention.SomatomotorLateral <- mean(commonmat[205:215, 97:111], na.rm = T)
+  DorsalAttention.VentralAttention <- mean(commonmat[220:230, 97:111], na.rm = T)
+  DorsalAttention.Visual <- mean(commonmat[231:267, 97:111], na.rm = T)
+  
+  FrontoParietal.MedialTemporal <- mean(commonmat[142:143, 112:141], na.rm = T)
+  FrontoParietal.ParietoMedial <- mean(commonmat[144:148, 112:141], na.rm = T)
+  FrontoParietal.Reward <- mean(commonmat[149:153, 112:141], na.rm = T)
+  FrontoParietal.Salience <- mean(commonmat[154:164, 112:141], na.rm = T)
+  FrontoParietal.SomatomotorDorsal <- mean(commonmat[165:204, 112:141], na.rm = T)
+  FrontoParietal.SomatomotorLateral <- mean(commonmat[205:215, 112:141], na.rm = T)
+  FrontoParietal.VentralAttention <- mean(commonmat[220:230, 112:141], na.rm = T)
+  FrontoParietal.Visual <- mean(commonmat[231:267, 112:141], na.rm = T)
+  
+  MedialTemporal.ParietoMedial <- mean(commonmat[144:148, 142:143], na.rm = T)
+  MedialTemporal.Reward <- mean(commonmat[149:153, 142:143], na.rm = T)
+  MedialTemporal.Salience <- mean(commonmat[154:164, 142:143], na.rm = T)
+  MedialTemporal.SomatomotorDorsal <- mean(commonmat[165:204, 142:143], na.rm = T)
+  MedialTemporal.SomatomotorLateral <- mean(commonmat[205:215, 142:143], na.rm = T)
+  MedialTemporal.VentralAttention <- mean(commonmat[220:230, 142:143], na.rm = T)
+  MedialTemporal.Visual <- mean(commonmat[231:267, 142:143], na.rm = T)
+  
+  ParietoMedial.Reward <- mean(commonmat[149:153, 144:148], na.rm = T)
+  ParietoMedial.Salience <- mean(commonmat[154:164, 144:148], na.rm = T)
+  ParietoMedial.SomatomotorDorsal <- mean(commonmat[165:204, 144:148], na.rm = T)
+  ParietoMedial.SomatomotorLateral <- mean(commonmat[205:215, 144:148], na.rm = T)
+  ParietoMedial.VentralAttention <- mean(commonmat[220:230, 144:148], na.rm = T)
+  ParietoMedial.Visual <- mean(commonmat[231:267, 144:148], na.rm = T)
+  
+  Reward.Salience <- mean(commonmat[154:164, 149:153], na.rm = T)
+  Reward.SomatomotorDorsal <- mean(commonmat[165:204, 149:153], na.rm = T)
+  Reward.SomatomotorLateral <- mean(commonmat[205:215, 149:153], na.rm = T)
+  Reward.VentralAttention <- mean(commonmat[220:230, 149:153], na.rm = T)
+  Reward.Visual <- mean(commonmat[231:267, 149:153], na.rm = T)
+  
+  Salience.SomatomotorDorsal <- mean(commonmat[165:204, 154:164], na.rm = T)
+  Salience.SomatomotorLateral <- mean(commonmat[205:215, 154:164], na.rm = T)
+  Salience.VentralAttention <- mean(commonmat[220:230, 154:164], na.rm = T)
+  Salience.Visual <- mean(commonmat[231:267, 154:164], na.rm = T)
+  
+  SomatomotorDorsal.SomatomotorLateral <- mean(commonmat[205:215, 165:204], na.rm = T)
+  SomatomotorDorsal.VentralAttention <- mean(commonmat[220:230, 165:204], na.rm = T)
+  SomatomotorDorsal.Visual <- mean(commonmat[231:267, 165:204], na.rm = T)
+  
+  SomatomotorLateral.VentralAttention <- mean(commonmat[220:230, 205:215], na.rm = T)
+  SomatomotorLateral.Visual <- mean(commonmat[231:267, 205:215], na.rm = T)
+  
+  VentralAttention.Visual <- mean(commonmat[231:267, 220:230], na.rm = T)
+  
+  id <- subject[i]
+  
+  subjdata <- data.frame(id, 
+Auditory,
+CinguloOpercular,
+DefaultMode,
+DorsalAttention,
+FrontoParietal,
+MedialTemporal,
+ParietoMedial,
+Reward,
+Salience,
+SomatomotorDorsal,
+SomatomotorLateral,
+VentralAttention,
+Visual,
+
+Auditory.CinguloOpercular,
+Auditory.DefaultMode,
+Auditory.DorsalAttention,
+Auditory.FrontoParietal,
+Auditory.MedialTemporal,
+Auditory.ParietoMedial,
+Auditory.Reward,
+Auditory.Salience,
+Auditory.SomatomotorDorsal,
+Auditory.SomatomotorLateral,
+Auditory.VentralAttention,
+Auditory.Visual,
+
+CinguloOpercular.DefaultMode,
+CinguloOpercular.DorsalAttention,
+CinguloOpercular.FrontoParietal,
+CinguloOpercular.MedialTemporal,
+CinguloOpercular.ParietoMedial,
+CinguloOpercular.Reward,
+CinguloOpercular.Salience,
+CinguloOpercular.SomatomotorDorsal,
+CinguloOpercular.SomatomotorLateral,
+CinguloOpercular.VentralAttention,
+CinguloOpercular.Visual,
+
+DefaultMode.DorsalAttention,
+DefaultMode.FrontoParietal,
+DefaultMode.MedialTemporal,
+DefaultMode.ParietoMedial,
+DefaultMode.Reward,
+DefaultMode.Salience,
+DefaultMode.SomatomotorDorsal,
+DefaultMode.SomatomotorLateral,
+DefaultMode.VentralAttention,
+DefaultMode.Visual,
+
+DorsalAttention.FrontoParietal,
+DorsalAttention.MedialTemporal,
+DorsalAttention.ParietoMedial,
+DorsalAttention.Reward,
+DorsalAttention.Salience,
+DorsalAttention.SomatomotorDorsal,
+DorsalAttention.SomatomotorLateral,
+DorsalAttention.VentralAttention,
+DorsalAttention.Visual,
+
+FrontoParietal.MedialTemporal,
+FrontoParietal.ParietoMedial,
+FrontoParietal.Reward,
+FrontoParietal.Salience,
+FrontoParietal.SomatomotorDorsal,
+FrontoParietal.SomatomotorLateral,
+FrontoParietal.VentralAttention,
+FrontoParietal.Visual,
+
+MedialTemporal.ParietoMedial,
+MedialTemporal.Reward,
+MedialTemporal.Salience,
+MedialTemporal.SomatomotorDorsal,
+MedialTemporal.SomatomotorLateral,
+MedialTemporal.VentralAttention,
+MedialTemporal.Visual,
+
+ParietoMedial.Reward,
+ParietoMedial.Salience,
+ParietoMedial.SomatomotorDorsal,
+ParietoMedial.SomatomotorLateral,
+ParietoMedial.VentralAttention,
+ParietoMedial.Visual,
+
+Reward.Salience,
+Reward.SomatomotorDorsal,
+Reward.SomatomotorLateral,
+Reward.VentralAttention,
+Reward.Visual,
+
+Salience.SomatomotorDorsal,
+Salience.SomatomotorLateral,
+Salience.VentralAttention,
+Salience.Visual,
+
+SomatomotorDorsal.SomatomotorLateral,
+SomatomotorDorsal.VentralAttention,
+SomatomotorDorsal.Visual,
+
+SomatomotorLateral.VentralAttention,
+SomatomotorLateral.Visual,
+
+VentralAttention.Visual)
+  
+  write.table(subjdata, row.names = F, col.names = T, sep = "\t", quote = F,
+              file = "funccon.tsv", append = T)
+}
+```
+
+
+```{r}
+# get group variable
+
+group <- read.csv("group.csv", header = FALSE)
+group$groupfac <- factor(group$V2, levels=c(1,2,3,4,5), labels=c("Control", 
+                                                                 "sBinge",
+                                                                 "eBinge",
+                                                                 "MJ+sBinge",
+                                                                 "MJ+eBinge"))
+group <- rename(group, groupnum = V2, id = V1)
+
+```
+
+# Make a dataframe: subjects = rows, within and between network correlation (91 DVs) = columns
+
+```{r}
+finaldf <- read.table("funccon.tsv", header = T, stringsAsFactors = F) %>% arrange(id)
+finaldf <- finaldf[!finaldf$id == "id",]
+
+finaldf <- merge(group, finaldf, by="id")
+finaldf[4:94] <- sapply(finaldf[4:94], as.numeric)
+
+write.table(finaldf, row.names = F, col.names = T, sep = "\t", quote = F, file = "finaldf.tsv")
+```
+
+
+# Make a dataframe: subjects = rows, ROI-ROI correlation = columns
+
+
+```{r}
+# function to convert upper triangle to vector by row
+to.upper<-function(X) t(X)[lower.tri(X,diag=F)]
+
+for (i in 1:length(subject)) {
+  subjmat <- read.table(file = paste0("./common/sub-",subject[i],".txt"), header = F)
+  vecupper <- as.matrix(t(to.upper(subjmat)))
+  write.table(vecupper, "allsub-roi2roi.txt", quote = F, row.names = F, col.names = F, append = T, sep = "\t")
+}
+```
+
+
+```{r}
+# vectorize lower triangle - elements ( 267 * 267 - 267)/2 == 35511
+
+roi2roidf <- read.table("allsub-roi2roi.txt", header = F, stringsAsFactors = F) 
+
+roi2roidf <- cbind(group, roi2roidf)
+
+
+write.table(roi2roidf, row.names = F, col.names = T, sep = "\t", quote = F, file = "roi2roidf.tsv")
+```
+
+
+# DON'T USE FOR NOW
+
+```{r}
+
+control <- group %>% filter(groupfac == "Control") %>% select(id)
+sbinge <- group %>% filter(groupfac == "sBinge") %>% select(id)
+ebinge <- group %>% filter(groupfac == "eBinge") %>% select(id)
+mjsbinge <- group %>% filter(groupfac == "MJ+sBinge") %>% select(id)
+mjebinge <- group %>% filter(groupfac == "MJ+eBinge") %>% select(id)
+
+conlist <- list()
+sbingelist <- list()
+ebingelist <- list()
+mjsbingelist <- list()
+mjebingelist <- list()
+
+for (i in 1:length(control)) {
+  conlist[[i]] <- read.table(file = paste0("./common/sub-",control[i,],".txt"), header = T)
+}
+
+for (i in 1:length(control)) {
+  sbingelist[[i]] <- read.table(file = paste0("./common/sub-",sbinge[i,],".txt"), header = T)
+}
+
+for (i in 1:length(control)) {
+  ebingelist[[i]] <- read.table(file = paste0("./common/sub-",ebinge[i,],".txt"), header = T)
+}
+
+for (i in 1:length(control)) {
+  mjsbingelist[[i]] <- read.table(file = paste0("./common/sub-",mjsbinge[i,],".txt"), header = T)
+}
+
+for (i in 1:length(control)) {
+  mjebingelist[[i]] <- read.table(file = paste0("./common/sub-",mjebinge[i,],".txt"), header = T)
+}
+
+
+```
+
+
+```{r}
+# The logic is to add the data frames together element by element (which + will do with data frames), then divide by the number of data frames. Using Reduce is necessary since + can only take two arguments at a time (and addition is associative
+conavg <-Reduce(`+`, conlist) / length(conlist)
+sbingeavg <-Reduce(`+`, sbingelist) / length(sbingelist)
+ebingeavg <-Reduce(`+`, ebingelist) / length(ebingelist)
+mjsbingeavg <-Reduce(`+`, mjsbingelist) / length(mjsbingelist)
+mjebingeavg <-Reduce(`+`, mjebingelist) / length(mjebingelist)
+
+rownames(conavg) <- common
+colnames(conavg) <- common
+```
+
+
+
+

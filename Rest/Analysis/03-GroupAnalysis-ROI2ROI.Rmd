@@ -1,0 +1,48 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+library(car)
+library(lsr)
+```
+
+
+```{r}
+roi2roidf <- read.table("roi2roidf.tsv", header = T)
+roi2roidf$groupfac <- factor(roi2roidf$groupfac,levels(roi2roidf$groupfac)[c(1,5,2,4,3)])
+```
+
+
+```{r}
+# names(roi2roidf)
+p_anova <- rep (0, 35511)
+
+for (i in 4:35514) {
+    model <- lm(unlist(roi2roidf[i]) ~ groupfac, data=roi2roidf)
+    anova <- Anova(model, contrasts = c("contr.sum", "contr.poly"), type="III")
+    p_anova[i-3] <- anova$"Pr(>F)"[2]
+    #cat(paste('\nDependent variable:', names(roi2roidf[i]), '\n'))
+    #print(anova)
+    #print(etaSquared(model, type = 3, anova = FALSE))
+    #print(leveneTest(model))
+    #print(shapiro.test(model[["residuals"]]))
+    #hist(residuals(model), col="darkgray")
+    #plot(fitted(model),residuals(model))
+}
+
+```
+
+
+```{r}
+p_fdr <- p.adjust(p_anova, method = c("fdr"), n = length(p_anova))
+which(p_fdr < 0.05)
+```
+
+
+```{r}
+write.table(p_anova, row.names = F, col.names = F, sep = "\t", quote = F, file = "p-uncorrected-roi2roi.tsv")
+write.table(p_fdr, row.names = F, col.names = F, sep = "\t", quote = F, file = "p-corrected-roi2roi.tsv")
+```
+

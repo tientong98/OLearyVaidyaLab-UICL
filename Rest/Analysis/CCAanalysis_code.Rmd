@@ -1,0 +1,564 @@
+---
+title: "CCA - 91 rsFC and drug use + YACCQ"
+output:
+  html_notebook:
+    df_print: paged
+    toc: yes
+  html_document:
+    df_print: paged
+    toc: yes
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+---
+
+# The code is modified from Dinga et al
+https://github.com/dinga92/niclin2019-biotypes
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=F)
+rm(list=ls())
+setwd("~/Documents/oleary/rest/")
+```
+
+# 0. Data loading and preparation
+
+## Load data
+### Resting state functional connectivity
+
+```{r}
+finaldf <- read.table("finaldf.tsv", header = T)
+rsFC <- finaldf[c(1, 4:94)]
+
+saveRDS(object = rsFC, file = "~/Documents/oleary/rest/91rsFC.rds")
+```
+
+### Covariates
+
+```{r warning=FALSE}
+library(foreign)
+spss <- read.spss("../Complete_Dataset_fix_missing_values.sav", to.data.frame = T, stringsAsFactors = F)
+
+finaldf$age <- as.numeric(as.character(spss$V1_Age))
+finaldf$sex <- spss$Sub_Gender.1
+covariates <- finaldf[c(1,95:96)]
+
+saveRDS(object = covariates, file = "~/Documents/oleary/rest/covariates.rds")
+```
+
+### YAACQ
+
+```{r}
+finaldf$YAACQ_Social_Interpersonal <- spss$V1_YAACQ_Social_Interpersonal
+finaldf$YAACQ_Impaired_Control <- spss$V1_YAACQ_Impaired_Control
+finaldf$YAACQ_Self_Perception <- spss$V1_YAACQ_Self_Perception
+finaldf$YAACQ_Self_Care <- spss$V1_YAACQ_Self_Care
+finaldf$YAACQ_Risk_Taking <- spss$V1_YAACQ_Risk_Taking
+finaldf$YAACQ_Academic_Occupational <- spss$V1_YAACQ_Academic_Occupational
+finaldf$YAACQ_Dependence <- spss$V1_YAACQ_Dependence
+finaldf$YAACQ_Blackouts <- spss$V1_YAACQ_Blackouts
+finaldf$YAACQ_Total <- 
+  finaldf$YAACQ_Social_Interpersonal +
+  finaldf$YAACQ_Impaired_Control +
+  finaldf$YAACQ_Self_Perception +
+  finaldf$YAACQ_Self_Care +
+  finaldf$YAACQ_Risk_Taking +
+  finaldf$YAACQ_Academic_Occupational +
+  finaldf$YAACQ_Dependence +
+  finaldf$YAACQ_Blackout
+
+yaacq <- finaldf[c(1,97:104)]
+saveRDS(object = yaacq, file = "~/Documents/oleary/rest/yaacq.rds")
+```
+
+### Substance Use Variables
+
+```{r}
+myvars <- c(
+"Subject_ID",
+"DaysBingeDrinking_Female_6thTo8thGrade",
+"DaysBingeDrinking_Female_9thGrade",
+"DaysBingeDrinking_Female_10thGrade",
+"DaysBingeDrinking_Female_11thGrade",
+"DaysBingeDrinking_Female_12thGrade",
+"DaysBingeDrinking_Female_SummerAfterHighSchool",
+"DaysBingeDrinking_Female_FreshmanYear",
+"DaysBingeDrinking_Female_SummerAfterFreshmanYear",
+"DaysBingeDrinking_Female_ThisAcademicYear",
+"V1_DaysBingeDrinking_Female_Past30Days",
+
+"DaysBingeDrinking_Male_6thTo8thGrade",
+"DaysBingeDrinking_Male_9thGrade",
+"DaysBingeDrinking_Male_10thGrade",
+"DaysBingeDrinking_Male_11thGrade",
+"DaysBingeDrinking_Male_12thGrade",
+"DaysBingeDrinking_Male_SummerAfterHighSchool",
+"DaysBingeDrinking_Male_FreshmanYear",
+"DaysBingeDrinking_Male_SummerAfterFreshmanYear",
+"DaysBingeDrinking_Male_ThisAcademicYear",
+"V1_DaysBingeDrinking_Male_Past30Days",
+
+"DaysExtremeBingeDrinking_Female_6thTo8thGrade",
+"DaysExtremeBingeDrinking_Female_9thGrade",
+"DaysExtremeBingeDrinking_Female_10thGrade",
+"DaysExtremeBingeDrinking_Female_11thGrade",
+"DaysExtremeBingeDrinking_Female_12thGrade",
+"DaysExtremeBingeDrinking_Female_SummerAfterHighSchool",
+"DaysExtremeBingeDrinking_Female_FreshmanYear",
+"DaysExtremeBingeDrinking_Female_SummerAfterFreshmanYear",
+"DaysExtremeBingeDrinking_Female_ThisAcademicYear",
+"V1_DaysExtremeBingeDrinking_Female_Past30Days",
+
+"DaysExtremeBingeDrinking_Male_6thTo8thGrade",
+"DaysExtremeBingeDrinking_Male_9thGrade",
+"DaysExtremeBingeDrinking_Male_10thGrade",
+"DaysExtremeBingeDrinking_Male_11thGrade",
+"DaysExtremeBingeDrinking_Male_12thGrade",
+"DaysExtremeBingeDrinking_Male_SummerAfterHighSchool",
+"DaysExtremeBingeDrinking_Male_FreshmanYear",
+"DaysExtremeBingeDrinking_Male_SummerAfterFreshmanYear",
+"DaysExtremeBingeDrinking_Male_ThisAcademicYear",
+"V1_DaysExtremeBingeDrinking_Male_Past30Days",
+
+"TotalDaysUsedCannabis_6thTo8thGrade",
+"TotalDaysUsedCannabis_9thGrade",
+"TotalDaysUsedCannabis_10thGrade",
+"TotalDaysUsedCannabis_11thGrade",
+"TotalDaysUsedCannabis_12thGrade",
+"TotalDaysUsedCannabis_SummerAfterHighSchool",
+"TotalDaysUsedCannabis_FreshmanYear",
+"TotalDaysUsedCannabis_SummerAfterFreshmanYear",
+"TotalDaysUsedCannabis_ThisAcademicYear",
+"V1_TotalDaysUsedCannabis_Past30Days",
+
+"AvgAmountCannabisSmoked_6thTo8thGrade",
+"AvgAmountCannabisSmoked_9thGrade",
+"AvgAmountCannabisSmoked_10thGrade",
+"AvgAmountCannabisSmoked_11thGrade",
+"AvgAmountCannabisSmoked_12thGrade",
+"AvgAmountCannabisSmoked_SummerAfterHighSchool",
+"AvgAmountCannabisSmoked_FreshmanYear",
+"AvgAmountCannabisSmoked_SummerAfterFreshmanYear",
+"AvgAmountCannabisSmoked_ThisAcademicYear",
+"V1_AvgAmountCannabisSmoked_Past30Days",
+
+"TotalDaysUsedTobacco_6thTo8thGrade",
+"TotalDaysUsedTobacco_9thGrade",
+"TotalDaysUsedTobacco_10thGrade",
+"TotalDaysUsedTobacco_11thGrade",
+"TotalDaysUsedTobacco_12thGrade",
+"TotalDaysUsedTobacco_SummerAfterHighSchool",
+"TotalDaysUsedTobacco_FreshmanYear",
+"TotalDaysUsedTobacco_SummerAfterFreshmanYear",
+"TotalDaysUsedTobacco_ThisAcademicYear",
+"V1_TotalDaysUsedTobacco_Past30Days",
+
+"AvgAmountTobaccoSmoked_6thTo8thGrade",
+"AvgAmountTobaccoSmoked_9thGrade",
+"AvgAmountTobaccoSmoked_10thGrade",
+"AvgAmountTobaccoSmoked_11thGrade",
+"AvgAmountTobaccoSmoked_12thGrade",
+"AvgAmountTobaccoSmoked_SummerAfterHighSchool",
+"AvgAmountTobaccoSmoked_FreshmanYear",
+"AvgAmountTobaccoSmoked_SummerAfterFreshmanYear",
+"AvgAmountTobaccoSmoked_ThisAcademicYear",
+"V1_AvgAmountTobaccoSmoked_Past30Days")
+
+substance <- spss[myvars]
+substance[substance[,] == -9] <- NA
+
+substance$DaysBinge_BeforeCollege <- rowSums(substance[c(
+"DaysBingeDrinking_Female_6thTo8thGrade",
+"DaysBingeDrinking_Female_9thGrade",
+"DaysBingeDrinking_Female_10thGrade",
+"DaysBingeDrinking_Female_11thGrade",
+"DaysBingeDrinking_Female_12thGrade",
+"DaysBingeDrinking_Female_SummerAfterHighSchool",
+"DaysBingeDrinking_Male_6thTo8thGrade",
+"DaysBingeDrinking_Male_9thGrade",
+"DaysBingeDrinking_Male_10thGrade",
+"DaysBingeDrinking_Male_11thGrade",
+"DaysBingeDrinking_Male_12thGrade",
+"DaysBingeDrinking_Male_SummerAfterHighSchool"
+)], na.rm = T)
+
+substance$DaysExtremeBinge_BeforeCollege <- rowSums(substance[c(
+"DaysExtremeBingeDrinking_Female_6thTo8thGrade",
+"DaysExtremeBingeDrinking_Female_9thGrade",
+"DaysExtremeBingeDrinking_Female_10thGrade",
+"DaysExtremeBingeDrinking_Female_11thGrade",
+"DaysExtremeBingeDrinking_Female_12thGrade",
+"DaysExtremeBingeDrinking_Female_SummerAfterHighSchool",
+"DaysExtremeBingeDrinking_Male_6thTo8thGrade",
+"DaysExtremeBingeDrinking_Male_9thGrade",
+"DaysExtremeBingeDrinking_Male_10thGrade",
+"DaysExtremeBingeDrinking_Male_11thGrade",
+"DaysExtremeBingeDrinking_Male_12thGrade",
+"DaysExtremeBingeDrinking_Male_SummerAfterHighSchool"
+)], na.rm = T)  
+
+substance$DaysUsedCannabis_BeforeCollege <- rowSums(substance[c(
+"TotalDaysUsedCannabis_6thTo8thGrade",
+"TotalDaysUsedCannabis_9thGrade",
+"TotalDaysUsedCannabis_10thGrade",
+"TotalDaysUsedCannabis_11thGrade",
+"TotalDaysUsedCannabis_12thGrade",
+"TotalDaysUsedCannabis_SummerAfterHighSchool"
+)], na.rm = T)
+
+substance$DaysUsedCannabis_BeforeCollege <- rowSums(substance[c(
+"TotalDaysUsedCannabis_6thTo8thGrade",
+"TotalDaysUsedCannabis_9thGrade",
+"TotalDaysUsedCannabis_10thGrade",
+"TotalDaysUsedCannabis_11thGrade",
+"TotalDaysUsedCannabis_12thGrade",
+"TotalDaysUsedCannabis_SummerAfterHighSchool"
+)], na.rm = T)
+
+substance$DaysUsedTobacco_BeforeCollege <- rowSums(substance[c(
+"TotalDaysUsedTobacco_6thTo8thGrade",
+"TotalDaysUsedTobacco_9thGrade",
+"TotalDaysUsedTobacco_10thGrade",
+"TotalDaysUsedTobacco_11thGrade",
+"TotalDaysUsedTobacco_12thGrade",
+"TotalDaysUsedTobacco_SummerAfterHighSchool"
+)], na.rm = T)
+
+substance$DaysBinge_College <- rowSums(substance[c(
+"DaysBingeDrinking_Female_FreshmanYear",
+"DaysBingeDrinking_Female_SummerAfterFreshmanYear",
+"DaysBingeDrinking_Female_ThisAcademicYear",
+"V1_DaysBingeDrinking_Female_Past30Days",
+"DaysBingeDrinking_Male_FreshmanYear",
+"DaysBingeDrinking_Male_SummerAfterFreshmanYear",
+"DaysBingeDrinking_Male_ThisAcademicYear",
+"V1_DaysBingeDrinking_Male_Past30Days"
+)], na.rm = T)
+
+substance$DaysExtremeBinge_College <- rowSums(substance[c(
+"DaysExtremeBingeDrinking_Female_FreshmanYear",
+"DaysExtremeBingeDrinking_Female_SummerAfterFreshmanYear",
+"DaysExtremeBingeDrinking_Female_ThisAcademicYear",
+"V1_DaysExtremeBingeDrinking_Female_Past30Days",
+"DaysExtremeBingeDrinking_Male_FreshmanYear",
+"DaysExtremeBingeDrinking_Male_SummerAfterFreshmanYear",
+"DaysExtremeBingeDrinking_Male_ThisAcademicYear",
+"V1_DaysExtremeBingeDrinking_Male_Past30Days"
+)], na.rm = T)
+
+substance$DaysUsedCannabis_College <- rowSums(substance[c(
+"TotalDaysUsedCannabis_FreshmanYear",
+"TotalDaysUsedCannabis_SummerAfterFreshmanYear",
+"TotalDaysUsedCannabis_ThisAcademicYear",
+"V1_TotalDaysUsedCannabis_Past30Days"
+)], na.rm = T)
+
+substance$DaysUsedTobacco_College <- rowSums(substance[c(
+"TotalDaysUsedTobacco_FreshmanYear",
+"TotalDaysUsedTobacco_SummerAfterFreshmanYear",
+"TotalDaysUsedTobacco_ThisAcademicYear",
+"V1_TotalDaysUsedTobacco_Past30Days"
+)], na.rm = T)
+
+substance$DaysBinge <- substance$DaysBinge_BeforeCollege + substance$DaysBinge_College
+substance$DaysExtremeBinge <- substance$DaysExtremeBinge_BeforeCollege + substance$DaysExtremeBinge_College
+substance$DaysUsedCannabis <- substance$DaysUsedCannabis_BeforeCollege + substance$DaysUsedCannabis_College
+substance$DaysUsedTobacco <- substance$DaysUsedTobacco_BeforeCollege + substance$DaysUsedTobacco_College
+names(substance)[1] <- "id"
+
+lifetimesubstance <- substance[c(1, 90:93)]
+saveRDS(object = lifetimesubstance, file = "~/Documents/oleary/rest/lifetimesubstance.rds")
+```
+
+### Personality Variables
+
+```{r}
+personality_scales <- c(
+"Subject_ID",
+"V1_BIS_Motor_Combined",
+"V1_BIS_Attentional_Combined",
+"V1_BIS_Nonplanning_Combined",
+"V1_SSS_Boredom_Susceptibility",
+"V1_SSS_Thrill_Adventure_Seeking",
+"V1_SSS_Disinhibition_without_substance_questions",
+"V1_SSS_Experience_Seeking_without_substance_questions",
+"V1_SSS_Overall_Score_no_substances")
+
+personality <- spss[personality_scales][,1:8]
+names(personality)[1] <- "id"
+
+saveRDS(object = personality, file = "~/Documents/oleary/rest/personality.rds")
+```
+
+
+```{r}
+behav <- merge(lifetimesubstance, yaacq, all = T)
+#behav <- merge(merge(lifetimesubstance, yaacq, all = T), personality, all = T)
+saveRDS(object = behav, file = "~/Documents/oleary/rest/behav.rds")
+```
+
+
+```{r}
+rs_connectivity <- readRDS("~/Documents/oleary/rest/91rsFC.rds")
+behav <- readRDS("~/Documents/oleary/rest/behav.rds")
+nuisance_covs <- readRDS("~/Documents/oleary/rest/covariates.rds")
+```
+
+Print number of rows of each loaded dataframe
+
+```{r}
+c('rs_connectivity' = nrow(rs_connectivity), 
+  'behav' = nrow(behav), 
+  'nuisance_covs' = nrow(nuisance_covs)) 
+```
+
+Are subjects in data frames in the same order?
+
+```{r}
+all(rs_connectivity$id == nuisance_covs$id)
+all(rs_connectivity$id == behav$id) 
+```
+
+Throw away the id column, because it is not needed anymore
+
+```{r}
+rs_connectivity <- rs_connectivity[, names(rs_connectivity) != 'id']
+behav <- behav[, names(behav) != 'id']
+nuisance_covs <- nuisance_covs[, names(nuisance_covs) != 'id'] 
+```
+
+
+## Summary statistics
+
+Summary of all subjects
+
+```{r}
+summary(nuisance_covs) 
+```
+
+
+## Regress out age and sex 
+
+```{r}
+residual_rs_connectivity <- matrix(NA,
+                                   nrow = nrow(rs_connectivity), 
+                                   ncol = ncol(rs_connectivity))
+
+for (i in 1:ncol(rs_connectivity)) {
+  fit <- lm(rs_connectivity[,i] ~ age + factor(sex),
+            data = nuisance_covs, na.action = na.exclude)
+  residual_rs_connectivity[,i] <- residuals(fit)
+}
+
+residual_rs_connectivity <- data.frame(residual_rs_connectivity)
+names(residual_rs_connectivity) <- names(rs_connectivity)
+
+```
+
+
+# 1. Canonical correlation analysis
+
+## Feature selection and CCA function
+
+Here we create a function that first selects resting state features (X) with the highest spearman correlation with any of behav symptoms (Y) and then fits and returns a CCA model. This function will be used to compute canonical correalotions and also later for permutation test and cross-validation.
+
+```{r}
+select_and_cca_fit <- function(X, Y, n_selected_vars){
+  library(candisc)
+  #select
+  correlations <- cor(Y, X, method = "spearman")
+  correlations <- apply(correlations, 2, function(x){max(abs(x))})
+  corr.threshold <- sort(correlations, decreasing = T)[n_selected_vars]
+  selected.X <- correlations >= corr.threshold
+  selected.X <- X[,selected.X]
+  #cca fit
+  cca_model <- candisc::cancor(selected.X, Y)
+  #return fitted model containing canonical correlations and wilks lambdas
+  return(cca_model)
+}
+
+```
+
+## Canonical correlations
+
+Fit the feature selection and CCA model, selecting 150 features and print all canonical correlations
+
+```{r}
+n_selected_vars <- 91
+cca_model <- select_and_cca_fit(residual_rs_connectivity, 
+                                behav, 
+                                n_selected_vars)
+cca_model$cancor
+Wilks(cca_model)
+```
+
+Create a function to compute canonical variates
+
+```{r}
+predict.cancor <- function(cancor.obj, X, Y){
+  X_pred <- as.matrix(X) %*% cancor.obj$coef$X
+  Y_pred <- as.matrix(Y) %*% cancor.obj$coef$Y
+  XY_pred <- list(X_pred, Y_pred)
+  names(XY_pred) <- c("X_pred", "Y_pred")
+  return(XY_pred)
+}
+```
+
+Visualize canonical correlations 
+
+```{r}
+canonical.variates <- predict.cancor(cca_model, 
+                               residual_rs_connectivity[,cca_model$names$X], 
+                               behav)
+cca_y_loadings <- cor(behav, canonical.variates$Y_pred)
+
+par(mfrow=c(1,2))
+plot(canonical.variates$X_pred[,1], 
+     canonical.variates$Y_pred[,1],
+     bty='n',
+     xlab='Connectivity canonical variate 1',
+     ylab='Behavioral canonical variate 1')
+text(-1, 1,  bquote(r^2 == .(round(cca_model$cancor[1], 2))))
+
+plot(canonical.variates$X_pred[,2], 
+     canonical.variates$Y_pred[,2],
+     bty='n',
+     xlab='Connectivity canonical variate 2',
+     ylab='Behavioral canonical variate 2')
+text(-2, 2,  bquote(r^2 == .(round(cca_model$cancor[2], 2))))
+
+```
+
+## Permutation test
+
+First get test statistics (canonical correlations and Wilks lambdas) from the real model 
+
+```{r}
+real_model <- cca_model
+real_results_cancor <- real_model$cancor
+real_results_wilks <- Wilks(real_model)$"LR test stat"
+```
+
+Obtain null distribution of test statistics by permuting rows of behav data
+
+```{r}
+library(permute)
+library(doMC)
+registerDoMC(cores=4) # to run it multicore
+
+nperms = 1999
+set.seed(123)
+
+# shuffle 
+shuffled_indexes <- sapply(1:nperms, function(x){
+                           shuffle(1:nrow(behav))})
+
+null_results <- foreach(i=1:nperms) %dopar% {
+  null_model <- select_and_cca_fit(residual_rs_connectivity,
+                                    behav[shuffled_indexes[,i],], 
+                                    n_selected_vars)
+  #return canonical correlations and wilks lambdas
+  list(null_model$cancor, Wilks(null_model)$"LR test stat")
+}
+
+# transform null results lists to data frame
+null_dist_cancor <- lapply(null_results, function(x){return(x[[1]])})
+null_dist_wilks <- lapply(null_results, function(x){return(x[[2]])})
+null_dist_cancor <- as.data.frame(do.call(rbind, null_dist_cancor))
+null_dist_wilks <- as.data.frame(do.call(rbind, null_dist_wilks))
+
+get_pval <- function(real, null_dist, better="smaller"){
+  if (better == "smaller"){
+    rank <- sum(real < null_dist) + 1
+  }
+  if (better == "bigger"){
+    rank <- sum(real > null_dist) + 1
+  }
+  pval <- rank / (length(null_dist) + 1)
+  return(pval)
+}
+
+pvals_cancor <- mapply(function(real, null_dist){
+                         get_pval(real, null_dist, better="smaller")},
+                       real_results_cancor,
+                       null_dist_cancor)
+pvals_wilks <- mapply(function(real, null_dist){
+                        get_pval(real, null_dist, better="bigger")},
+                       real_results_wilks,
+                       null_dist_wilks)
+```
+
+Print p-values
+
+```{r}
+print(cbind("component"=1:length(pvals_cancor), pvals_cancor, pvals_wilks))
+```
+
+Visualize null distributions and p-values for first two canonical correlations
+
+```{r}
+par(mfrow=c(2,1))
+for (i in 1:2){
+  hist(null_dist_cancor[,i], breaks = 25, main = paste("Null dist corr CV", i),
+       xlim=c(0.7,1))
+  abline(v=real_results_cancor[i], col="red")
+}
+```
+
+
+## Stability of canonical loadings
+
+Create function that performes leave-one-out jackknife procedure to get uncertainity of canonical loadings taking into an account uncertainity caused by feature selection. 
+
+Jackknife repeatedly leaves one subject out and then performs the feature selection and CCA procedure in the same way as above. 
+
+```{r}
+njack <- nrow(residual_rs_connectivity)
+jack_res <- foreach(i=1:njack) %dopar% {
+  model <- select_and_cca_fit(residual_rs_connectivity[-i,],
+                               behav[-i,],
+                               n_selected_vars)
+  selected.vars <- model$names$X
+  prediction <- predict.cancor(model, 
+                               residual_rs_connectivity[i, selected.vars], 
+                               behav[i,])
+  list(prediction, model)
+}
+```
+
+run jackknife
+
+```{r}
+jack.results <- lapply(jack_res, function(x){return(x[[1]])})
+jack.X <- lapply(jack.results, function(x){return(x[[1]])})
+jack.X <- as.data.frame(do.call(rbind, jack.X))
+jack.Y <- lapply(jack.results, function(x){return(x[[2]])})
+jack.Y <- as.data.frame(do.call(rbind, jack.Y))
+```
+
+get loadings from saved jackknife models
+
+```{r}
+jack_models <- lapply(jack_res, function(x){return(x[[2]])})
+jack.loadings <- lapply(jack_models, function(model){
+  return(model$structure$Y.yscores[,1])})
+jack.loadings <- as.data.frame(do.call(rbind, jack.loadings))
+```
+
+plot distribution of canonical loadings across all jackknife models
+
+```{r, message=F}
+library(reshape2)
+melted.loadings <- melt(jack.loadings)
+
+par(mfrow=c(1,2), las=1, mai=c(1.02, 1.3, 0.82, 0.42))
+boxplot(abs(value) ~ variable, data=melted.loadings, horizontal=T)
+plot(abs(melted.loadings$value), 
+     jitter(as.numeric(melted.loadings$variable)), 
+     pch='.')
+```
+
+# 3. Software enviroment
+```{r}
+sessionInfo()
+```

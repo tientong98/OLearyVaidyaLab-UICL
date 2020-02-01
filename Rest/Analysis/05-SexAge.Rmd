@@ -1,0 +1,164 @@
+---
+title: "04- Sex and Age Effects"
+output: html_document
+---
+
+
+```{r}
+rm(list=ls())
+setwd("~/Documents/oleary/rest/")
+```
+
+
+```{r}
+library(dplyr)
+library(car)
+library(lsr)
+library(ggplot2)
+library(ggstatsplot)
+library(foreign)
+library(psych)
+library(Hmisc)
+library(ppcor)
+```
+
+
+```{r}
+finaldf <- read.table("finaldf_fin.tsv", sep = "\t", header = T)
+finaldf$groupfac <- factor(finaldf$groupfac,levels(finaldf$groupfac)[c(1,5,2,4,3)])
+```
+
+
+# Sex effects: Functional connectivity, YAACQ, drug use frequency
+
+
+```{r}
+p_sex <- rep (0, 112)
+
+for (i in c(4:115)) {
+  bartlett_sex <- bartlett.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf)
+  if (bartlett_sex$p.value >= 0.05) {
+    ttest_sex <- t.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf, 
+                            var.equal=TRUE, conf.level=0.95)} 
+  else {ttest_sex <- t.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf, 
+                                var.equal=FALSE, conf.level=0.95)}
+  p_sex[i-3] <- ttest_sex$p.value
+  #cat(paste('\nDependent variable:', names(finaldf[i]), '\n'))
+  #print(ttest_sex)
+}
+```
+
+
+```{r}
+p_fdr_sex <- p.adjust(p_sex, method = c("fdr"), n = length(p_sex))
+p_fdr_sex
+```
+
+
+```{r}
+which(p_fdr_sex < 0.05)
+p_sex[p_sex < 0.05]
+which(p_sex < 0.05)
+```
+
+- Nothing survive FDR (although YAACQ subscores do not require correction -- I think?)
+
+## Print out significant uncorrected p + significant variables' names
+
+```{r}
+names(finaldf)[which(p_sex < 0.05)+3]
+```
+
+## Print out the ttests that are interesting
+
+```{r}
+for (i in which(names(finaldf) == "V1_YAACQ_Self_Care")) {
+  bartlett_sex <- bartlett.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf)
+  if (bartlett_sex$p.value >= 0.05) {
+    ttest_sex <- t.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf, 
+                            var.equal=TRUE, conf.level=0.95)} 
+  else {ttest_sex <- t.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf, 
+                                var.equal=FALSE, conf.level=0.95)}
+  p_sex[i-3] <- ttest_sex$p.value
+  cat(paste('\nDependent variable:', names(finaldf[i]), '\n'))
+  print(ttest_sex)
+}
+```
+
+Females showed higher negative consequences (self care)
+
+```{r}
+for (i in which(names(finaldf) == "DaysBinge_BeforeCollege")) {
+  bartlett_sex <- bartlett.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf)
+  if (bartlett_sex$p.value >= 0.05) {
+    ttest_sex <- t.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf, 
+                            var.equal=TRUE, conf.level=0.95)} 
+  else {ttest_sex <- t.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf, 
+                                var.equal=FALSE, conf.level=0.95)}
+  p_sex[i-3] <- ttest_sex$p.value
+  cat(paste('\nDependent variable:', names(finaldf[i]), '\n'))
+  print(ttest_sex)
+}
+```
+
+Before college, females reported higher binge drink
+
+
+```{r}
+for (i in which(names(finaldf) == "DaysBinge_College")) {
+  bartlett_sex <- bartlett.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf)
+  if (bartlett_sex$p.value >= 0.05) {
+    ttest_sex <- t.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf, 
+                            var.equal=TRUE, conf.level=0.95)} 
+  else {ttest_sex <- t.test(unlist(finaldf[i]) ~ Sub_Gender.1, data=finaldf, 
+                                var.equal=FALSE, conf.level=0.95)}
+  p_sex[i-3] <- ttest_sex$p.value
+  cat(paste('\nDependent variable:', names(finaldf[i]), '\n'))
+  print(ttest_sex)
+}
+```
+
+
+# Age effects: Functional connectivity, YAACQ, drug use frequency
+
+
+```{r}
+p_age <- rep (0, 112)
+
+for (i in c(4:115)) {
+    model <- lm(unlist(finaldf[i]) ~ V1_Age, data=finaldf)
+    anova <- Anova(model, contrasts = c("contr.sum", "contr.poly"), type="III")
+    p_age[i-3] <- anova$"Pr(>F)"[2]
+    #cat(paste('\nDependent variable:', names(roi2roidf[i]), '\n'))
+    #print(anova)
+    #print(etaSquared(model, type = 3, anova = FALSE))
+    #print(leveneTest(model))
+    #print(shapiro.test(model[["residuals"]]))
+    #hist(residuals(model), col="darkgray")
+    #plot(fitted(model),residuals(model))
+}
+```
+
+
+```{r}
+p_fdr_age <- p.adjust(p_age, method = c("fdr"), n = length(p_age))
+p_fdr_age
+```
+
+DaysBinge_College showed age effect after FDR correction
+
+```{r}
+names(finaldf[which(p_fdr_age < 0.05) + 3])
+```
+
+## Print out significant uncorrected p + significant variables' names
+
+```{r}
+p_age[p_age < 0.05]
+which(p_age < 0.05)
+```
+
+```{r}
+names(finaldf)[which(p_age < 0.05)+3]
+```
+

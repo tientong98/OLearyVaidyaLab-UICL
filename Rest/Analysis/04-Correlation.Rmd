@@ -1,0 +1,420 @@
+---
+title: "02-groupfacAnalysis_BetweenWithinNetwork"
+output: html_document
+---
+
+
+```{r}
+rm(list=ls())
+setwd("~/Documents/oleary/rest/")
+```
+
+
+```{r}
+library(dplyr)
+library(car)
+library(lsr)
+library(ggplot2)
+library(ggstatsplot)
+library(foreign)
+library(psych)
+library(Hmisc)
+library(ppcor)
+```
+
+
+```{r}
+finaldf <- read.table("finaldf.tsv", header = T)
+finaldf$groupfac <- factor(finaldf$groupfac,levels(finaldf$groupfac)[c(1,5,2,4,3)])
+spss <- read.spss("../Complete_Dataset_fix_missing_values.sav", to.data.frame = T, stringsAsFactors = F)
+```
+
+```{r}
+finaldf$V1_YAACQ_Social_Interpersonal <- spss$V1_YAACQ_Social_Interpersonal
+finaldf$V1_YAACQ_Impaired_Control <- spss$V1_YAACQ_Impaired_Control
+finaldf$V1_YAACQ_Self_Perception <- spss$V1_YAACQ_Self_Perception
+finaldf$V1_YAACQ_Self_Care <- spss$V1_YAACQ_Self_Care
+finaldf$V1_YAACQ_Risk_Taking <- spss$V1_YAACQ_Risk_Taking
+finaldf$V1_YAACQ_Academic_Occupational <- spss$V1_YAACQ_Academic_Occupational
+finaldf$V1_YAACQ_Dependence <- spss$V1_YAACQ_Dependence
+finaldf$V1_YAACQ_Blackouts <- spss$V1_YAACQ_Blackouts
+finaldf$V1_YAACQ_Total <- finaldf$V1_YAACQ_Social_Interpersonal +
+  finaldf$V1_YAACQ_Impaired_Control +
+  finaldf$V1_YAACQ_Self_Perception +
+  finaldf$V1_YAACQ_Self_Care +
+  finaldf$V1_YAACQ_Risk_Taking +
+  finaldf$V1_YAACQ_Academic_Occupational +
+  finaldf$V1_YAACQ_Dependence +
+  finaldf$V1_YAACQ_Blackout
+  
+```
+
+
+```{r}
+myvars <- c(
+"Subject_ID",
+"DaysBingeDrinking_Female_6thTo8thGrade",
+"DaysBingeDrinking_Female_9thGrade",
+"DaysBingeDrinking_Female_10thGrade",
+"DaysBingeDrinking_Female_11thGrade",
+"DaysBingeDrinking_Female_12thGrade",
+"DaysBingeDrinking_Female_SummerAfterHighSchool",
+"DaysBingeDrinking_Female_FreshmanYear",
+"DaysBingeDrinking_Female_SummerAfterFreshmanYear",
+"DaysBingeDrinking_Female_ThisAcademicYear",
+"V1_DaysBingeDrinking_Female_Past30Days",
+
+"DaysBingeDrinking_Male_6thTo8thGrade",
+"DaysBingeDrinking_Male_9thGrade",
+"DaysBingeDrinking_Male_10thGrade",
+"DaysBingeDrinking_Male_11thGrade",
+"DaysBingeDrinking_Male_12thGrade",
+"DaysBingeDrinking_Male_SummerAfterHighSchool",
+"DaysBingeDrinking_Male_FreshmanYear",
+"DaysBingeDrinking_Male_SummerAfterFreshmanYear",
+"DaysBingeDrinking_Male_ThisAcademicYear",
+"V1_DaysBingeDrinking_Male_Past30Days",
+
+"DaysExtremeBingeDrinking_Female_6thTo8thGrade",
+"DaysExtremeBingeDrinking_Female_9thGrade",
+"DaysExtremeBingeDrinking_Female_10thGrade",
+"DaysExtremeBingeDrinking_Female_11thGrade",
+"DaysExtremeBingeDrinking_Female_12thGrade",
+"DaysExtremeBingeDrinking_Female_SummerAfterHighSchool",
+"DaysExtremeBingeDrinking_Female_FreshmanYear",
+"DaysExtremeBingeDrinking_Female_SummerAfterFreshmanYear",
+"DaysExtremeBingeDrinking_Female_ThisAcademicYear",
+"V1_DaysExtremeBingeDrinking_Female_Past30Days",
+
+"DaysExtremeBingeDrinking_Male_6thTo8thGrade",
+"DaysExtremeBingeDrinking_Male_9thGrade",
+"DaysExtremeBingeDrinking_Male_10thGrade",
+"DaysExtremeBingeDrinking_Male_11thGrade",
+"DaysExtremeBingeDrinking_Male_12thGrade",
+"DaysExtremeBingeDrinking_Male_SummerAfterHighSchool",
+"DaysExtremeBingeDrinking_Male_FreshmanYear",
+"DaysExtremeBingeDrinking_Male_SummerAfterFreshmanYear",
+"DaysExtremeBingeDrinking_Male_ThisAcademicYear",
+"V1_DaysExtremeBingeDrinking_Male_Past30Days",
+
+"TotalDaysUsedCannabis_6thTo8thGrade",
+"TotalDaysUsedCannabis_9thGrade",
+"TotalDaysUsedCannabis_10thGrade",
+"TotalDaysUsedCannabis_11thGrade",
+"TotalDaysUsedCannabis_12thGrade",
+"TotalDaysUsedCannabis_SummerAfterHighSchool",
+"TotalDaysUsedCannabis_FreshmanYear",
+"TotalDaysUsedCannabis_SummerAfterFreshmanYear",
+"TotalDaysUsedCannabis_ThisAcademicYear",
+"V1_TotalDaysUsedCannabis_Past30Days",
+
+"AvgAmountCannabisSmoked_6thTo8thGrade",
+"AvgAmountCannabisSmoked_9thGrade",
+"AvgAmountCannabisSmoked_10thGrade",
+"AvgAmountCannabisSmoked_11thGrade",
+"AvgAmountCannabisSmoked_12thGrade",
+"AvgAmountCannabisSmoked_SummerAfterHighSchool",
+"AvgAmountCannabisSmoked_FreshmanYear",
+"AvgAmountCannabisSmoked_SummerAfterFreshmanYear",
+"AvgAmountCannabisSmoked_ThisAcademicYear",
+"V1_AvgAmountCannabisSmoked_Past30Days",
+
+"TotalDaysUsedTobacco_6thTo8thGrade",
+"TotalDaysUsedTobacco_9thGrade",
+"TotalDaysUsedTobacco_10thGrade",
+"TotalDaysUsedTobacco_11thGrade",
+"TotalDaysUsedTobacco_12thGrade",
+"TotalDaysUsedTobacco_SummerAfterHighSchool",
+"TotalDaysUsedTobacco_FreshmanYear",
+"TotalDaysUsedTobacco_SummerAfterFreshmanYear",
+"TotalDaysUsedTobacco_ThisAcademicYear",
+"V1_TotalDaysUsedTobacco_Past30Days",
+
+"AvgAmountTobaccoSmoked_6thTo8thGrade",
+"AvgAmountTobaccoSmoked_9thGrade",
+"AvgAmountTobaccoSmoked_10thGrade",
+"AvgAmountTobaccoSmoked_11thGrade",
+"AvgAmountTobaccoSmoked_12thGrade",
+"AvgAmountTobaccoSmoked_SummerAfterHighSchool",
+"AvgAmountTobaccoSmoked_FreshmanYear",
+"AvgAmountTobaccoSmoked_SummerAfterFreshmanYear",
+"AvgAmountTobaccoSmoked_ThisAcademicYear",
+"V1_AvgAmountTobaccoSmoked_Past30Days")
+
+substance <- spss[myvars]
+substance[substance[,] == -9] <- NA
+
+substance$DaysBinge_BeforeCollege <- rowSums(substance[c(
+"DaysBingeDrinking_Female_6thTo8thGrade",
+"DaysBingeDrinking_Female_9thGrade",
+"DaysBingeDrinking_Female_10thGrade",
+"DaysBingeDrinking_Female_11thGrade",
+"DaysBingeDrinking_Female_12thGrade",
+"DaysBingeDrinking_Female_SummerAfterHighSchool",
+"DaysBingeDrinking_Male_6thTo8thGrade",
+"DaysBingeDrinking_Male_9thGrade",
+"DaysBingeDrinking_Male_10thGrade",
+"DaysBingeDrinking_Male_11thGrade",
+"DaysBingeDrinking_Male_12thGrade",
+"DaysBingeDrinking_Male_SummerAfterHighSchool"
+)], na.rm = T)
+
+substance$DaysExtremeBinge_BeforeCollege <- rowSums(substance[c(
+"DaysExtremeBingeDrinking_Female_6thTo8thGrade",
+"DaysExtremeBingeDrinking_Female_9thGrade",
+"DaysExtremeBingeDrinking_Female_10thGrade",
+"DaysExtremeBingeDrinking_Female_11thGrade",
+"DaysExtremeBingeDrinking_Female_12thGrade",
+"DaysExtremeBingeDrinking_Female_SummerAfterHighSchool",
+"DaysExtremeBingeDrinking_Male_6thTo8thGrade",
+"DaysExtremeBingeDrinking_Male_9thGrade",
+"DaysExtremeBingeDrinking_Male_10thGrade",
+"DaysExtremeBingeDrinking_Male_11thGrade",
+"DaysExtremeBingeDrinking_Male_12thGrade",
+"DaysExtremeBingeDrinking_Male_SummerAfterHighSchool"
+)], na.rm = T)  
+
+substance$DaysUsedCannabis_BeforeCollege <- rowSums(substance[c(
+"TotalDaysUsedCannabis_6thTo8thGrade",
+"TotalDaysUsedCannabis_9thGrade",
+"TotalDaysUsedCannabis_10thGrade",
+"TotalDaysUsedCannabis_11thGrade",
+"TotalDaysUsedCannabis_12thGrade",
+"TotalDaysUsedCannabis_SummerAfterHighSchool"
+)], na.rm = T)
+
+substance$DaysUsedCannabis_BeforeCollege <- rowSums(substance[c(
+"TotalDaysUsedCannabis_6thTo8thGrade",
+"TotalDaysUsedCannabis_9thGrade",
+"TotalDaysUsedCannabis_10thGrade",
+"TotalDaysUsedCannabis_11thGrade",
+"TotalDaysUsedCannabis_12thGrade",
+"TotalDaysUsedCannabis_SummerAfterHighSchool"
+)], na.rm = T)
+
+substance$DaysUsedTobacco_BeforeCollege <- rowSums(substance[c(
+"TotalDaysUsedTobacco_6thTo8thGrade",
+"TotalDaysUsedTobacco_9thGrade",
+"TotalDaysUsedTobacco_10thGrade",
+"TotalDaysUsedTobacco_11thGrade",
+"TotalDaysUsedTobacco_12thGrade",
+"TotalDaysUsedTobacco_SummerAfterHighSchool"
+)], na.rm = T)
+
+substance$DaysBinge_College <- rowSums(substance[c(
+"DaysBingeDrinking_Female_FreshmanYear",
+"DaysBingeDrinking_Female_SummerAfterFreshmanYear",
+"DaysBingeDrinking_Female_ThisAcademicYear",
+"V1_DaysBingeDrinking_Female_Past30Days",
+"DaysBingeDrinking_Male_FreshmanYear",
+"DaysBingeDrinking_Male_SummerAfterFreshmanYear",
+"DaysBingeDrinking_Male_ThisAcademicYear",
+"V1_DaysBingeDrinking_Male_Past30Days"
+)], na.rm = T)
+
+substance$DaysExtremeBinge_College <- rowSums(substance[c(
+"DaysExtremeBingeDrinking_Female_FreshmanYear",
+"DaysExtremeBingeDrinking_Female_SummerAfterFreshmanYear",
+"DaysExtremeBingeDrinking_Female_ThisAcademicYear",
+"V1_DaysExtremeBingeDrinking_Female_Past30Days",
+"DaysExtremeBingeDrinking_Male_FreshmanYear",
+"DaysExtremeBingeDrinking_Male_SummerAfterFreshmanYear",
+"DaysExtremeBingeDrinking_Male_ThisAcademicYear",
+"V1_DaysExtremeBingeDrinking_Male_Past30Days"
+)], na.rm = T)
+
+substance$DaysUsedCannabis_College <- rowSums(substance[c(
+"TotalDaysUsedCannabis_FreshmanYear",
+"TotalDaysUsedCannabis_SummerAfterFreshmanYear",
+"TotalDaysUsedCannabis_ThisAcademicYear",
+"V1_TotalDaysUsedCannabis_Past30Days"
+)], na.rm = T)
+
+substance$DaysUsedTobacco_College <- rowSums(substance[c(
+"TotalDaysUsedTobacco_FreshmanYear",
+"TotalDaysUsedTobacco_SummerAfterFreshmanYear",
+"TotalDaysUsedTobacco_ThisAcademicYear",
+"V1_TotalDaysUsedTobacco_Past30Days"
+)], na.rm = T)
+
+substance$DaysBinge <- substance$DaysBinge_BeforeCollege + substance$DaysBinge_College
+substance$DaysExtremeBinge <- substance$DaysExtremeBinge_BeforeCollege + substance$DaysExtremeBinge_College
+substance$DaysUsedCannabis <- substance$DaysUsedCannabis_BeforeCollege + substance$DaysUsedCannabis_College
+substance$DaysUsedTobacco <- substance$DaysUsedTobacco_BeforeCollege + substance$DaysUsedTobacco_College
+names(substance)[1] <- "id"
+
+substanceuse <- substance[c(1, 82:93)]
+finaldf <- merge(finaldf, substanceuse, by = "id")
+#
+#finaldf <- finaldf[-c(107:119)]
+
+```
+
+
+```{r}
+finaldf$V1_Age <- as.numeric(as.character(spss$V1_Age))
+finaldf$Sub_Gender.1 <- spss$Sub_Gender.1
+# 2 == Female
+finaldf$Gender <- as.numeric(finaldf$Sub_Gender.1)
+
+finaldf$DrinkingCategory <- spss$Drinking_Category
+finaldf$BingeHistory <- as.factor(ifelse(finaldf$DrinkingCategory == "Binge                ", "Binge", 
+                                  ifelse(finaldf$DrinkingCategory == "Binge History        ", "BingeHistory",
+                                        NA)))
+
+finaldf$ExtremeBingeHistory <- as.factor(ifelse(finaldf$DrinkingCategory == "Extreme Binge        ",
+                                                "ExtremeBinge", 
+                                         ifelse(finaldf$DrinkingCategory == "Extreme Binge History",
+                                                "ExtremeBingeHistory", NA)))
+```
+
+
+
+```{r}
+finaldf_excon <- finaldf %>% filter(groupfac != "Control")
+```
+
+
+# YAACQ
+
+```{r}
+for (i in 95:103) {
+  hist(finaldf[i])
+}
+```
+
+
+```{r}
+cor.fconYAACQ <- rcorr(as.matrix(finaldf[c(4:94, 95:103)]), type = c("spearman"))
+write.table(cor.fconYAACQ$P, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "fconYAACQcorrel-p-uncorrect.tsv")
+write.table(cor.fconYAACQ$r, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "fconYAACQcorrel-coeffi.tsv")
+
+to.upper<-function(X) t(X)[lower.tri(X,diag=F)]
+p.uncorrect.vector <- to.upper(cor.fconYAACQ$P)
+
+p.fdr.vector <- p.adjust(p.uncorrect.vector, method = c("fdr"), n = length(p.uncorrect.vector))
+
+p.fdr.matrix <- matrix(0, 100, 100)
+p.fdr.matrix[lower.tri(p.fdr.matrix, diag=FALSE)] <- p.fdr.vector
+p.fdr.matrix <- as.data.frame(t(p.fdr.matrix))
+rownames(p.fdr.matrix) <- rownames(cor.fconYAACQ$P)
+colnames(p.fdr.matrix) <- colnames(cor.fconYAACQ$P)
+
+write.table(p.fdr.matrix, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "~/Documents/oleary/rest/fconYAACQcorrel-p-correct.tsv")
+```
+
+
+# FCON and YAACQ correl without controls
+
+
+```{r}
+for (i in 95:103) {
+  hist(finaldf_excon[i])}
+```
+
+
+```{r}
+cor.fconYAACQ.fullexcon <- rcorr(as.matrix(finaldf[c(4:94, 95:103)]), type = c("spearman"))
+write.table(cor.fconYAACQ.fullexcon$P, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "FULLfconYAACQcorrel-p-uncorrectEXCON.tsv")
+write.table(cor.fconYAACQ.fullexcon$r, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "FULLfconYAACQcorrel-coeffiEXCON.tsv")
+
+to.upper<-function(X) t(X)[lower.tri(X,diag=F)]
+p.uncorrect.vector.fullexcon <- to.upper(cor.fconYAACQ.fullexcon$P)
+
+p.fdr.vector.fullexcon <- p.adjust(p.uncorrect.vector.fullexcon, method = c("fdr"), 
+                         n = length(p.uncorrect.vector.fullexcon))
+
+p.fdr.matrix.fullexcon  <- matrix(0, 100, 100)
+p.fdr.matrix.fullexcon[lower.tri(p.fdr.matrix.fullexcon, diag=FALSE)] <- p.fdr.vector.fullexcon
+p.fdr.matrix.fullexcon <- as.data.frame(t(p.fdr.matrix.fullexcon))
+rownames(p.fdr.matrix.fullexcon) <- rownames(cor.fconYAACQ.fullexcon$P)
+colnames(p.fdr.matrix.fullexcon) <- colnames(cor.fconYAACQ.fullexcon$P)
+
+write.table(p.fdr.matrix.fullexcon, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "~/Documents/oleary/rest/FULLfconYAACQcorrel-p-correctEXCON.tsv")
+```
+
+` partial.r`
+The second usage is to partial a set of variables(y) out of another set (x). It is sometimes convenient to partial the effect of a number of variables (e.g., sex, age, education) out of the correlations of another set of variables. This could be done laboriously by finding the residuals of various multiple correlations, and then correlating these residuals. The matrix algebra alternative is to do it directly. To find the confidence intervals and "significance" of the correlations, use the corr.p function with n = n - s where s is the numer of covariates.
+IN THIS CASE N = 181 - 2 = 179
+
+```{r}
+cor.fconYAACQ.excon <- partial.r(data.matrix(finaldf_excon), c(4:94, 95:103), c(116,118),
+                                 method="spearman")
+
+cor.fconYAACQ.excon.p <-  corr.p(cor.fconYAACQ.excon, n = 179, adjust="fdr", alpha=.05, minlength=2)
+
+write.table(cor.fconYAACQ.excon, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "fconYAACQcorrel-coeffi-EXCON.tsv")
+  
+write.table(cor.fconYAACQ.excon.p$p, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "fconYAACQcorrel-p-correct-EXCON.tsv")
+
+```
+
+# Binge/ExBinge Frequency
+
+```{r}
+for (i in 112:115) {
+  hist(finaldf_excon[i])}
+```
+
+
+```{r}
+cor.fcondrug <- rcorr(as.matrix(finaldf[c(4:94, 112:115)]), type = c("spearman"))
+write.table(cor.fcondrug$P, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "fcondrugcorrel-p-uncorrect.tsv")
+write.table(cor.fcondrug$r, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "fcondrugcorrel-coeffi.tsv")
+
+to.upper<-function(X) t(X)[lower.tri(X,diag=F)]
+p.uncorrect.vector.drug <- to.upper(cor.fcondrug$P)
+
+p.fdr.vector.drug <- p.adjust(p.uncorrect.vector.drug, method = c("fdr"), 
+                              n = length(p.uncorrect.vector.drug))
+
+p.fdr.matrix.drug <- matrix(0, 95, 95)
+p.fdr.matrix.drug[lower.tri(p.fdr.matrix.drug, diag=FALSE)] <- p.fdr.vector.drug
+p.fdr.matrix.drug <- as.data.frame(t(p.fdr.matrix.drug))
+rownames(p.fdr.matrix.drug) <- rownames(cor.fcondrug$P)
+colnames(p.fdr.matrix.drug) <- colnames(cor.fcondrug$P)
+
+write.table(p.fdr.matrix.drug, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "fcondrugcorrel-p-correct.tsv")
+```
+
+
+```{r}
+cor.fcondrug.excon <- rcorr(data.matrix(finaldf_excon[c(4:94, 112:115)]), type = c("spearman"))
+write.table(cor.fcondrug.excon$P, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "fcondrugcorrel-p-uncorrectEXCON.tsv")
+write.table(cor.fcondrug.excon$r, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "fcondrugcorrel-coeffiEXCON.tsv")
+
+to.upper<-function(X) t(X)[lower.tri(X,diag=F)]
+p.uncorrect.vector.drugexcon <- to.upper(cor.fcondrug.excon$P)
+
+p.fdr.vector.drugexcon <- p.adjust(p.uncorrect.vector.drugexcon, method = c("fdr"), 
+                              n = length(p.uncorrect.vector.drugexcon))
+
+p.fdr.matrix.drugexcon <- matrix(0, 95, 95)
+p.fdr.matrix.drugexcon[lower.tri(p.fdr.matrix.drugexcon, diag=FALSE)] <- p.fdr.vector.drugexcon
+p.fdr.matrix.drugexcon <- as.data.frame(t(p.fdr.matrix.drugexcon))
+rownames(p.fdr.matrix.drugexcon) <- rownames(cor.fcondrug.excon$P)
+colnames(p.fdr.matrix.drugexcon) <- colnames(cor.fcondrug.excon$P)
+
+write.table(p.fdr.matrix.drugexcon, row.names = T, col.names = NA, sep = "\t", 
+            quote = F, file = "fcondrugcorrel-p-correctEXCON.tsv")
+```
+
+
+```{r}
+write.table(finaldf, row.names = F, col.names = T, sep = "\t", quote = F, file = "finaldf_fin.tsv")
+finaldf <- read.csv2("~/Documents/oleary/rest/finaldf_fin.tsv", sep = "\t")
+```
+
