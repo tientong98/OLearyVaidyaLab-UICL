@@ -1,3 +1,4 @@
+Step-by-step analysis was detailed below.
 
 # BIDSification
 
