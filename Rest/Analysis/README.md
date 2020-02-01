@@ -1,7 +1,7 @@
 Outputs from the Subject level analysis pipeline are outputs from AFNI 3dNetCorr.
 
-1. `01-CleanData.Rmd` Read and clean the data, only include 267 ROIs (out of the original 300) that all subjects have data for. Then, calculate 91 between (off diagonal) and within (on diagonal) correlations from the 13 networks (13 actual network, 1 for the unassigned ROI).
-2. `02-GroupAnalysis-BetweenWithinNetwork.Rmd` Write a for loop to test 1-way anova (5 groups) for each of the 91 DVs, store the p values of those F tests in a vector, then run `p.adjust` using this pvalues vector as input.
-3. `03-GroupAnalysis-ROI2ROI.Rmd` The correlation matrix is 267 x 267, resulting in 35511 unique elements. This script test 1-way anova (5 groups) for each of those 35511 DVs, just out of morbid curiosity.
-4. `04-Correlation.Rmd` correlation between the 91 within- and between-network correlation with self-reported substance use and negative consequences related to alcohol use.
-5. `05-SexAge.Rmd` Testing the effect of sex and age on Functional connectivity, YAACQ, drug use frequency
+* `01-CleanData.Rmd` Read and clean the data, only include 267 ROIs (out of the original 300) that all subjects have data for. Then, calculate 91 between (off diagonal) and within (on diagonal) correlations from the 13 networks (13 actual network, 1 for the unassigned ROI).
+* `02-GroupAnalysis-BetweenWithinNetwork.Rmd` Write a for loop to test 1-way anova (5 groups) for each of the 91 DVs, store the p values of those F tests in a vector, then run `p.adjust` using this pvalues vector as input.
+* `03-GroupAnalysis-ROI2ROI.Rmd` The correlation matrix is 267 x 267, resulting in 35511 unique elements. This script test 1-way anova (5 groups) for each of those 35511 DVs, just out of morbid curiosity.
+* `04-Correlation.Rmd` correlation between the 91 within- and between-network correlation with self-reported substance use and negative consequences related to alcohol use.
+* `05-SexAge.Rmd` Testing the effect of sex and age on Functional connectivity, YAACQ, drug use frequency
