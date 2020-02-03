@@ -1,6 +1,6 @@
 # Group Analysis
 
-**Analysis folder**: Code of various group statistical tests, after rsFCs (using the Extended Power atlas) have been computed and extracted.
+**[Analysis folder](https://github.com/tientong98/OLearyVaidyaLab-UICL/tree/master/Rest/Analysis)**: Code of various group statistical tests, after rsFCs (using the Extended Power atlas) have been computed and extracted.
 
 # Subject level analysis
 
