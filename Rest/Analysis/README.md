@@ -1,7 +1,7 @@
 Inputs for the group analysis = Outputs from the Subject level analysis pipeline, which are are outputs from AFNI 3dNetCorr.
 
 * `01-CleanData.Rmd` Read and clean the data, only include 267 ROIs (out of the original 300) that all subjects have data for. Then, calculate 91 between (off diagonal) and within (on diagonal) correlations from the 13 networks (from the [extended Power atlas](https://wustl.app.box.com/s/twpyb1pflj6vrlxgh3rohyqanxbdpelw), 13 actual networks, 1 for the unassigned ROIs).
-  * [Group average correlation matrix](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/Analysis/plot.pdf) - pretty comparable to the orginial paper(https://doi.org/10.1016/j.neuroimage.2019.116290), except:
+  * [Group average correlation matrix](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/Analysis/plot.pdf) - pretty comparable to the orginial paper (https://doi.org/10.1016/j.neuroimage.2019.116290), except:
       * They used Gobal Signal Regression --> They have more negative correlations than our sample
       * They plotted the ROIs with NULL data (white rows/columns), while I excluded those from the beginning.
 * `02-GroupAnalysis-BetweenWithinNetwork.Rmd` Write a for loop to test 1-way anova (5 groups) for each of the 91 DVs, store the p values of those F tests in a vector, then run `p.adjust` using this pvalues vector as input.
