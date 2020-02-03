@@ -6,7 +6,7 @@
 
 Step-by-step analysis (raw -> subject level analysis) was detailed below.
 
-# BIDSification
+## BIDSification
 
 Run heudiconv. Scripts stored in:
 `/oleary/functional/UICL/BIDS/code`
@@ -16,7 +16,7 @@ details in **Heudiconv.ipynb**
 Then, check to see if heudiconv failed for any subject using **check_missing_outputs.ipynb**
 
 
-# Exclude dummy TRs
+## Exclude dummy TRs
 
 Once you get the data in BIDS format, you need to get rid of the dummy TRs at the beginning of the run BEFORE running FMRIPREP
 
@@ -29,7 +29,7 @@ Remember to make a note of this in a task json file (/oleary/functional/UICL/BID
 
 Rest data = 177 volumes x 2s TR = 354s = 5.9 mins
 
-# Run MRIQC
+## Run MRIQC
 
 
 ```bash
@@ -54,7 +54,7 @@ participant --participant-label $(cat /Shared/oleary/functional/UICL/BIDS/subjec
 --n_procs 8 --mem_gb 55
 ```
 
-# Run FMRIPREP
+## Run FMRIPREP
 
 Note: As of Sep 5 2019 fmriprep version 1.4.1 the ANTs command for fieldmap-less distortion correction (`--use-syn-sdc`) didn't work with the new MNI152 template (details here https://github.com/poldracklab/fmriprep/issues/1665)
 
@@ -114,7 +114,7 @@ for sub in $(cat /Shared/oleary/functional/UICL/BIDS/subject_list/fails.txt | tr
 done 
 ```
 
-# Use the extended Power ROI 
+## Use the extended Power ROI 
 
 Links: https://greenelab.wustl.edu/data_software
 
@@ -127,7 +127,7 @@ Then run
 
 to create 300 spherical ROIs
 
-# Nuisance Regression
+## Nuisance Regression
 
 Code in: /oleary/functional/UICL/BIDS/code
 
@@ -144,7 +144,7 @@ sh rest04_bpreg.sh 2>&1 | tee /oleary/functional/UICL/BIDS/derivatives/subject_l
 sh rest05_ROIts.sh 2>&1 | tee /oleary/functional/UICL/BIDS/derivatives/subject_level_glm/rest/extendedPowerlog.txt
 ```
 
-# Seed-whole brain correlation analysis
+## Seed-whole brain correlation analysis
 
 Code: `/oleary/functional/UICL/BIDS/code/rest07_seedbased.sh`
     
@@ -152,7 +152,7 @@ First, use `3dmaskave` to get time series of interested ROIs.
 Then, use `3dTcorr1D` to get correlation between ROIs timeseries and the rest of the brain
 Lastly, use `3dcalc` to do Fisher's r to z transformation 
 
-# Group analysis of seed based analysis: randomise
+## Group analysis of seed based analysis: randomise
 
 User guide hereL https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Randomise/UserGuide
 
@@ -163,14 +163,14 @@ Need: group average nifti, design matrix and contrast file
 
 Code: `/oleary/functional/UICL/BIDS/code/randomise/rest` 
 
-## 40 Controls vs 180 Bingers
+### 40 Controls vs 180 Bingers
 
 First, run `get_input.Rmd` to get list of files with subjects in the correct order
 Then, run `fslmerge` with option `t` to concatnate all files to create the input of `randomise`
 
-## 5 groups comparison: Control vs sBinge vs eBinge vs sBingeMJ vs eBinge MJ
+### 5 groups comparison: Control vs sBinge vs eBinge vs sBingeMJ vs eBinge MJ
 
-# xcpEngine - not use this right now
+## xcpEngine - not use this right now
 
 https://xcpengine.readthedocs.io/overview.html
 
@@ -188,7 +188,7 @@ In order to incorporate the new atlas to xcpEngine pipeline, need to follow the 
 2. Create a new folder in the atlas directory to include the new atlas
 3. change the design file /xcpEngine-master/designs/fc-36p_scrub_mergedatlas.dsn so that all lines of codes that used power264 now used the merged atlas
 
-# xcpEngine Step 1 - create a cohort file
+## xcpEngine Step 1 - create a cohort file
 
 https://xcpengine.readthedocs.io/config/cohort.html#cohortfile
 
@@ -226,7 +226,7 @@ singularity run \
   -o /mnt/functional/UICL/BIDS/derivatives/xcpengine
 ```
 
-# Create an atlas
+## Create an atlas
 
 Download the following 3 atlases (now downloaded and are in **/oleary/atlas**):  
 Buckner cerebellum: http://www.freesurfer.net/fswiki/CerebellumParcellation_Buckner2011  
