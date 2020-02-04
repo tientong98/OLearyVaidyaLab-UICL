@@ -154,7 +154,7 @@ Lastly, use `3dcalc` to do Fisher's r to z transformation
 
 ## Group analysis of seed based analysis: randomise
 
-User guide hereL https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Randomise/UserGuide
+User guide here: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Randomise/UserGuide
 
 `randomise -i <4D_input_data> -o <output_rootname> -d design.mat -t design.con -m /Shared/pinc/sharedopt/apps/fsl/Linux/x86_64/5.0.8_multicore/data/standard/MNI152_T1_2mm_brain_mask.nii.gz -n 5000 -T`
 
@@ -165,15 +165,18 @@ Code: `/oleary/functional/UICL/BIDS/code/randomise/rest`
 
 First, run [get_input.Rmd](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/get_input.Rmd) to get list of files with subjects in the correct order
 
-Then, run `fslmerge` with option `t` to concatnate all files to create the input of `randomise`. [Example](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/makeinpute_LAmyg.sh)
+Then, run `fslmerge` with option `-t` to concatnate all files to create the input of `randomise`. [Example](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/makeinpute_LAmyg.sh)
 
-Lastly, run randomise scripts
-    * Creat [template file](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/randomise_TEMPLATE.sh) to run randomise across different ROIs and Contrasts
-    * Run the for loop below for specific ROI and Contrast
-    ```
-    for roi in LAmyg RAmyg LNAcc RNAcc ; do
-        for contrast in ConvBinge 5group ; do
-            sed -e "s|ROI|${roi}|" -e "s|CONTRAST|${contrast}|" randomise_TEMPLATE.sh > randomise_${roi}_${contrast}.sh
-        done
+Lastly, run randomise scripts:
+
+   * Creat [template file](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/randomise_TEMPLATE.sh) to run randomise across different ROIs and Contrasts
+    
+   * Run the for loop below for specific ROI and Contrast
+    
+```bash
+for roi in LAmyg RAmyg LNAcc RNAcc ; do
+    for contrast in ConvBinge 5group ; do
+        sed -e "s|ROI|${roi}|" -e "s|CONTRAST|${contrast}|" randomise_TEMPLATE.sh > randomise_${roi}_${contrast}.sh
     done
-    ```
+done
+```
