@@ -156,133 +156,24 @@ Lastly, use `3dcalc` to do Fisher's r to z transformation
 
 User guide hereL https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Randomise/UserGuide
 
-randomise -i <4D_input_data> -o <output_rootname> -d design.mat -t design.con -m <mask_image> -n 500 -D -T
+`randomise -i <4D_input_data> -o <output_rootname> -d design.mat -t design.con -m /Shared/pinc/sharedopt/apps/fsl/Linux/x86_64/5.0.8_multicore/data/standard/MNI152_T1_2mm_brain_mask.nii.gz -n 5000 -T`
 
 Tutorial here: https://www.youtube.com/watch?v=Ukl1VWobviw
 Need: group average nifti, design matrix and contrast file
 
 Code: `/oleary/functional/UICL/BIDS/code/randomise/rest` 
 
-### 40 Controls vs 180 Bingers
+First, run [get_input.Rmd](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/get_input.Rmd) to get list of files with subjects in the correct order
 
-First, run `get_input.Rmd` to get list of files with subjects in the correct order
-Then, run `fslmerge` with option `t` to concatnate all files to create the input of `randomise`
+Then, run `fslmerge` with option `t` to concatnate all files to create the input of `randomise`. [Example](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/makeinpute_LAmyg.sh)
 
-### 5 groups comparison: Control vs sBinge vs eBinge vs sBingeMJ vs eBinge MJ
-
-## xcpEngine - not use this right now
-
-https://xcpengine.readthedocs.io/overview.html
-
-now downloaded in /oleary/xcpEngine-master
-
-install the python wrapper: pip install xcpengine-container
-
-download singularity image using the following code: 
-
-singularity build xcpEngine.simg docker://pennbbl/xcpengine:latest
-
-In order to incorporate the new atlas to xcpEngine pipeline, need to follow the instructions in: https://xcpengine.readthedocs.io/development.html
-
-1. Clonning the source code: git clone https://github.com/PennBBL/xcpEngine.git
-2. Create a new folder in the atlas directory to include the new atlas
-3. change the design file /xcpEngine-master/designs/fc-36p_scrub_mergedatlas.dsn so that all lines of codes that used power264 now used the merged atlas
-
-## xcpEngine Step 1 - create a cohort file
-
-https://xcpengine.readthedocs.io/config/cohort.html#cohortfile
-
-
-```bash
-ls /oleary/functional/UICL/BIDS/derivatives/fmriprep/rest/fmriprep/sub-*/ses-*/func/*rest*MNI152NLin2009cAsym_preproc.nii.gz > /oleary/functional/UICL/BIDS/derivatives/xcpengine/cohort01.csv
-
-awk '{gsub("/oleary/functional/UICL/BIDS/derivatives/fmriprep/rest/fmriprep/", "");print}' /oleary/functional/UICL/BIDS/derivatives/xcpengine/cohort01.csv > /oleary/functional/UICL/BIDS/derivatives/xcpengine/cohort02.csv
-
-```
-
-
-```bash
-# example script to run xcpengine on argon
-# to understand the script, read this:
-# https://sudoneuroscience.wordpress.com/2017/06/08/running-multiple-jobs-on-the-argon-cluster-example-with-fmriprep/
-
-
-
-#!/bin/sh
-#$ -pe smp 3
-#$ -q PINC
-#$ -m e
-#$ -M tien-tong@uiowa.edu
-#$ -o /Users/tientong/logs/uicl/xcpengine/out
-#$ -e /Users/tientong/logs/uicl/xcpengine/err
-
-singularity run \
-  -B /Shared/oleary:/mnt \
-  /Users/tientong/xcpEngine.simg \
-  -d /Users/tientong/xcpEngine/designs/fc-36p_scrub.dsn \
-  -c /mnt/functional/UICL/BIDS/derivatives/xcpengine/cohort.csv \
-  -r /mnt/functional/UICL/BIDS/derivatives/fmriprep/rest/fmriprep \
-  -i $TMPDIR \
-  -o /mnt/functional/UICL/BIDS/derivatives/xcpengine
-```
-
-## Create an atlas
-
-Download the following 3 atlases (now downloaded and are in **/oleary/atlas**):  
-Buckner cerebellum: http://www.freesurfer.net/fswiki/CerebellumParcellation_Buckner2011  
-Choi striatum: https://surfer.nmr.mgh.harvard.edu/fswiki/StriatumParcellation_Choi2012  
-Schaefer cortical: https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal  
-
-Use James's script **/oleary/atlas/merge_atlas.py** by running the line of code below, when you're in /oleary/atlas   
-
-
-```bash
-./merge_atlas.py \
--a Schaefer/MNI/Schaefer2018_400Parcels_17Networks_order_FSLMNI152_2mm.nii.gz \
-Choi_JNeurophysiol12_MNI152/Choi2012_17Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz \
-Buckner_JNeurophysiol11_MNI152/Buckner2011_17Networks_MNI152_FreeSurferConformed1mm_LooseMask.nii.gz \
--r /Shared/pinc/sharedopt/apps/fsl/Linux/x86_64/5.0.11_multicore/data/standard/MNI152_T1_2mm_brain.nii.gz \
--t schaefer_parcel-400_network-17.tsv -n Striatal Cerebellar
-
-# Afterward, you'll have those files:  
-
-# lut.tsv -- a look up table with the regions indexes and names    
-# mergedAtlas.nii.gz -- a new atlas that are the combination of the 3 atlases
-```
-
-
-```bash
-#!/bin/sh
-
-#$ -pe smp 2
-#$ -q PINC
-#$ -m e
-#$ -M tien-tong@uiowa.edu
-#$ -o /Users/tientong/logs/uicl/xcpengine/out
-#$ -e /Users/tientong/logs/uicl/xcpengine/err
-
-singularity run -B /Users/tientong/xcpEngine/atlas/merged:/xcpEngine/atlas/merged \
--H /Users/tientong/singularity_home \
-/Users/tientong/xcpEngine.simg \
--d /Users/tientong/xcpEngine/designs/fc-aroma_mergedatlas.dsn \
--c /Shared/oleary/functional/UICL/BIDS/derivatives/xcpengine/cohort.csv \
--o /Shared/oleary/functional/UICL/BIDS/derivatives/xcpengine/testmergedatlas \
--t 1 -r /Shared/oleary/functional/UICL/BIDS/derivatives/fmriprep/rest/fmriprep
-```
-
-
-```bash
-singularity shell \
-  -B /Shared/oleary:/mnt \
-  -B `pwd`/xcpEngine:/xcpEngine \
-  xcpEngine.simg
-```
-
-
-```bash
-xcpEngine\
-  -d /xcpEngine/designs/fc-36p_scrub_mergedatlas.dsn \
-  -c /mnt/functional/UICL/BIDS/derivatives/xcpengine/cohort.csv \
-  -i /mnt/functional/UICL/BIDS/derivatives/xcpengine \
-  -o /mnt/functional/UICL/BIDS/derivatives/xcpengine
-```
+Lastly, run randomise scripts
+    * Creat [template file](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/randomise_TEMPLATE.sh) to run randomise across different ROIs and Contrasts
+    * Run the for loop below for specific ROI and Contrast
+    ```
+    for roi in LAmyg RAmyg LNAcc RNAcc ; do
+        for contrast in ConvBinge 5group ; do
+            sed -e "s|ROI|${roi}|" -e "s|CONTRAST|${contrast}|" randomise_TEMPLATE.sh > randomise_${roi}_${contrast}.sh
+        done
+    done
+    ```
