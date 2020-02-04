@@ -146,13 +146,13 @@ sh rest05_ROIts.sh 2>&1 | tee /oleary/functional/UICL/BIDS/derivatives/subject_l
 
 ## Seed-whole brain correlation analysis
 
-Code: `/oleary/functional/UICL/BIDS/code/rest07_seedbased.sh`
+Code: [rest07_seedbased.sh](https://github.com/tientong98/OLearyVaidyaLab-UICL/blob/master/Rest/rest07_seedbased.sh)
     
 First, use `3dmaskave` to get time series of interested ROIs.
 Then, use `3dTcorr1D` to get correlation between ROIs timeseries and the rest of the brain
 Lastly, use `3dcalc` to do Fisher's r to z transformation 
 
-## Group analysis of seed based analysis: randomise
+# Group analysis of seed based analysis: randomise
 
 User guide here: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Randomise/UserGuide
 
